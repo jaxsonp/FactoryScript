@@ -3,7 +3,7 @@ pub static mut DEBUG_LEVEL: u8 = 0;
 
 mod macros;
 pub mod pallet;
-mod preprocessor;
+pub mod preprocessor;
 pub mod station;
 
 use pallet::*;
@@ -52,7 +52,7 @@ impl std::fmt::Display for ErrorType {
 
 /// Defines the position of a span of characters in the source code, used for
 /// syntax parsing and error reporting
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct SourceLocation {
     /// line number
     pub line: usize,
@@ -68,7 +68,7 @@ impl std::fmt::Display for SourceLocation {
 }
 
 /// Helper for the cardinal directions
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Direction {
     NORTH,
     SOUTH,

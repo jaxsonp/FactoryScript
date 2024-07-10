@@ -1,7 +1,7 @@
 use crate::*;
 
 const BELTS: &str = "─│┌┐└┘═║╔╗╚╝";
-const SINGLE_BELTS: &str = "─│┌┐└┘";
+//const SINGLE_BELTS: &str = "─│┌┐└┘";
 const DOUBLE_BELTS: &str = "═║╔╗╚╝";
 const NORTH_BELTS: &str = "│└┘║╚╝";
 const EAST_BELTS: &str = "─┌└═╔╚";
@@ -58,7 +58,10 @@ pub fn evaluate_bay(
 }
 
 /// follows a path of block drawing characters until its end
-fn probe(map: &Vec<Vec<char>>, start: (usize, usize, Direction)) -> Result<(usize, usize), Error> {
+pub fn probe(
+    map: &Vec<Vec<char>>,
+    start: (usize, usize, Direction),
+) -> Result<(usize, usize), Error> {
     let mut pos = (start.0, start.1);
     let mut facing = start.2;
     debug!(4, "      probing starting at {}:{}", pos.0, pos.1);
@@ -79,25 +82,25 @@ fn probe(map: &Vec<Vec<char>>, start: (usize, usize, Direction)) -> Result<(usiz
             '║' => {}
             '╔' => facing = Direction::EAST,
             '╗' => facing = Direction::WEST,
-            _ => panic!(),
+            _ => panic!("Output bay didnt start with double belt"),
         },
         Direction::EAST => match c {
             '═' => {}
             '╝' => facing = Direction::NORTH,
             '╗' => facing = Direction::SOUTH,
-            _ => panic!(),
+            _ => panic!("Output bay didnt start with double belt"),
         },
         Direction::SOUTH => match c {
             '║' => {}
             '╚' => facing = Direction::EAST,
             '╝' => facing = Direction::WEST,
-            _ => panic!(),
+            _ => panic!("Output bay didnt start with double belt"),
         },
         Direction::WEST => match c {
             '═' => {}
             '╚' => facing = Direction::NORTH,
             '╔' => facing = Direction::SOUTH,
-            _ => panic!(),
+            _ => panic!("Output bay didnt start with double belt"),
         },
     }
     loop {
@@ -168,4 +171,106 @@ fn probe(map: &Vec<Vec<char>>, start: (usize, usize, Direction)) -> Result<(usiz
 pub enum Bay {
     In,
     Out(usize, usize),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_probe() {
+        let map = vec![
+            vec!['═', '─', '─', '┐'],
+            vec![' ', '┌', '┐', '│'],
+            vec![' ', '┘', '└', '┘'],
+        ];
+        assert_eq!(probe(&map, (0, 0, Direction::EAST)).ok().unwrap(), (2, 0));
+    }
+
+    #[test]
+    fn test_evaluate_bay_none() {
+        let map = vec![
+            vec![' ', ' ', ' ', ' '],
+            vec![' ', '[', ']', ' '],
+            vec![' ', ' ', ' ', ' '],
+        ];
+        assert!(matches!(
+            evaluate_bay(&map, (0, 1, Direction::NORTH)),
+            Ok(None)
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (1, 0, Direction::EAST)),
+            Ok(None)
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (0, 3, Direction::WEST)),
+            Ok(None)
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (2, 1, Direction::SOUTH)),
+            Ok(None)
+        ));
+    }
+
+    #[test]
+    fn test_evaluate_bay_in() {
+        let map = vec![
+            vec![' ', '┐', '│', '┌', ' '],
+            vec!['─', '[', ' ', ']', '─'],
+            vec![' ', '┘', '│', '└', ' '],
+        ];
+        assert!(matches!(
+            evaluate_bay(&map, (0, 1, Direction::NORTH)),
+            Ok(Some(Bay::In))
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (0, 2, Direction::NORTH)),
+            Ok(Some(Bay::In))
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (0, 3, Direction::NORTH)),
+            Ok(Some(Bay::In))
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (1, 0, Direction::EAST)),
+            Ok(Some(Bay::In))
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (1, 4, Direction::WEST)),
+            Ok(Some(Bay::In))
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (2, 1, Direction::SOUTH)),
+            Ok(Some(Bay::In))
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (2, 2, Direction::SOUTH)),
+            Ok(Some(Bay::In))
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (2, 3, Direction::SOUTH)),
+            Ok(Some(Bay::In))
+        ));
+    }
+
+    #[test]
+    fn test_evaluate_bay_out() {
+        let map = vec![
+            vec![' ', '╗', '┌', '┐'],
+            vec!['╔', '[', ']', '│'],
+            vec!['└', '╚', '─', '┘'],
+        ];
+        assert!(matches!(
+            evaluate_bay(&map, (0, 1, Direction::NORTH)),
+            Ok(Some(Bay::Out(0, 0)))
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (1, 0, Direction::WEST)),
+            Ok(Some(Bay::Out(2, 1)))
+        ));
+        assert!(matches!(
+            evaluate_bay(&map, (2, 1, Direction::SOUTH)),
+            Ok(Some(Bay::Out(1, 2)))
+        ));
+    }
 }

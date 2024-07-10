@@ -28,6 +28,7 @@ pub enum StationType {
     PRINT,
     PRINTLN,
     ASSIGN(String),
+    JOIN,
 }
 impl StationType {
     pub fn from_str(s: &str) -> Self {
@@ -36,6 +37,7 @@ impl StationType {
             "exit" => Self::EXIT,
             "print" => Self::PRINT,
             "println" => Self::PRINTLN,
+            "" => Self::JOIN,
             _ => {
                 todo!("{}", s)
             }
@@ -52,6 +54,7 @@ impl std::fmt::Display for StationType {
             Self::ASSIGN(s) => {
                 format!("assign [{s}])")
             }
+            Self::JOIN => String::from("join"),
         };
         write!(f, "{s}")
     }
@@ -68,6 +71,18 @@ impl StationModifiers {
         Self {
             reverse: false,
             priority: Direction::NORTH,
+        }
+    }
+    pub fn reverse(self) -> Self {
+        Self {
+            reverse: !self.reverse,
+            ..self
+        }
+    }
+    pub fn with_priority(self, new_priority: Direction) -> Self {
+        Self {
+            priority: new_priority,
+            ..self
         }
     }
 }

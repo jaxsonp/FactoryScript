@@ -1,8 +1,10 @@
 use regex::Regex;
 
-use crate::*;
+pub mod probe;
+#[cfg(test)]
+mod tests;
 
-mod probe;
+use crate::*;
 use probe::Bay;
 
 /// Preprocesses a source string, validating the syntax and grammar
@@ -179,7 +181,7 @@ fn discover_stations(lines: &Vec<&str>) -> Result<Vec<Station>, Error> {
 fn get_char_index_from_byte_offset(byte_offset: usize, s: &str) -> usize {
     let s = String::from(s);
     let mut char_index = 0;
-    for (pos, _) in s.char_indices() {
+    for (pos, c) in s.char_indices() {
         if byte_offset <= pos {
             return char_index;
         }
@@ -189,7 +191,7 @@ fn get_char_index_from_byte_offset(byte_offset: usize, s: &str) -> usize {
 }
 
 /// Returns a vector of all valid bay positions around a station
-fn get_neighbors(map: &Vec<Vec<char>>, station: &Station) -> Vec<(usize, usize, Direction)> {
+pub fn get_neighbors(map: &Vec<Vec<char>>, station: &Station) -> Vec<(usize, usize, Direction)> {
     let mut neighbors: Vec<(usize, usize, Direction)> = Vec::new();
 
     let mut northern_neighbors: Vec<(usize, usize, Direction)> = Vec::new();
@@ -286,5 +288,6 @@ fn get_neighbors(map: &Vec<Vec<char>>, station: &Station) -> Vec<(usize, usize, 
             }
         }
     }
+
     return neighbors;
 }
