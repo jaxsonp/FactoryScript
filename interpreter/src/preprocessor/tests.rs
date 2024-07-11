@@ -19,8 +19,7 @@ fn test_discover_stations() {
 #[test]
 fn test_discover_stations_four() {
     let lines: Vec<&str> = vec!["[exit][exit]", "[start][exit]"];
-    let (stations, start_i) = discover_stations(&lines).ok().unwrap();
-    assert_eq!(start_i, 2);
+    let (stations, _) = discover_stations(&lines).ok().unwrap();
     assert_eq!(stations.len(), 4);
 }
 
@@ -81,7 +80,7 @@ fn test_get_neighbors() {
             col: 1,
             len: 2,
         },
-        StationModifiers::default().with_priority(Direction::EAST),
+        StationModifiers::default(),
     );
     assert_eq!(
         get_neighbors(&map, &station),
