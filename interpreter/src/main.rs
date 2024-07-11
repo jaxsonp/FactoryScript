@@ -10,7 +10,7 @@ fn main() -> ExitCode {
 
     // setting global options
     unsafe {
-        DEBUG_LEVEL = cli.verbosity;
+        DEBUG_LEVEL = cli.debug_level;
         COLOR_OUTPUT = !cli.no_color;
         debug!(1, "Debug level:\t{}", DEBUG_LEVEL);
     }
@@ -62,9 +62,9 @@ struct Cli {
     /// Conveyor program to execute
     file: Option<String>,
 
-    /// Increase verbosity, can be supplied multiple times
-    #[arg(short = 'v', long = "verbose", action = clap::ArgAction::Count)]
-    verbosity: u8,
+    /// Increase debug logging level, can be supplied multiple times
+    #[arg(short = 'd', long = "verbose", action = clap::ArgAction::Count)]
+    debug_level: u8,
 
     /// Disable colored terminal output
     #[arg(long = "no-color")]
