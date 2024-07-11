@@ -1,13 +1,5 @@
 use crate::*;
-
-#[allow(dead_code)]
-const BELTS: &str = "─│┌┐└┘═║╔╗╚╝";
-const SINGLE_BELTS: &str = "─│┌┐└┘";
-const DOUBLE_BELTS: &str = "═║╔╗╚╝";
-const NORTH_BELTS: &str = "│└┘║╚╝";
-const EAST_BELTS: &str = "─┌└═╔╚";
-const SOUTH_BELTS: &str = "│┌┐║╔╗";
-const WEST_BELTS: &str = "─┐┘═╗╝";
+use fs_core::*;
 
 /// Given a starting position around a station, check if it is an input bay and
 /// if it is find the origin of the conveyor belt

@@ -1,0 +1,12 @@
+[workspace]
+members = [
+	"stdlib",
+	"interpreter", 
+	"fs-core"
+]
+
+[workspace.package]
+version = "0.1.0"
+authors = ["Jaxson Pahukula <jaxpahu@gmail.com>"]
+edition = "2021"
+readme = "./README.md"

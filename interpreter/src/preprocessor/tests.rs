@@ -3,7 +3,8 @@ use super::*;
 #[test]
 fn test_discover_stations() {
     let lines: Vec<&str> = vec!["[start]"];
-    let stations = discover_stations(&lines).ok().unwrap();
+    let (stations, start_i) = discover_stations(&lines).ok().unwrap();
+    assert_eq!(start_i, 0);
     let station = &stations[0];
     assert_eq!(
         station.loc,
@@ -13,27 +14,14 @@ fn test_discover_stations() {
             len: 7
         }
     );
-    assert!(matches!(station.t, StationType::START));
-}
-
-#[test]
-fn test_discover_stations_assign() {
-    let lines: Vec<&str> = vec!["[start] {test}"];
-    let stations = discover_stations(&lines).ok().unwrap();
-    assert_eq!(stations.len(), 2);
-    let station = &stations[1];
-    #[allow(unused_variables)]
-    {
-        let s = String::from("test");
-        assert!(matches!(&station.t, StationType::ASSIGN(s)));
-    }
 }
 
 #[test]
 fn test_discover_stations_four() {
-    let lines: Vec<&str> = vec!["[start][exit]", "[exit][exit]"];
-    let stations = discover_stations(&lines);
-    assert_eq!(stations.ok().unwrap().len(), 4);
+    let lines: Vec<&str> = vec!["[exit][exit]", "[start][exit]"];
+    let (stations, start_i) = discover_stations(&lines).ok().unwrap();
+    assert_eq!(start_i, 2);
+    assert_eq!(stations.len(), 4);
 }
 
 #[test]
@@ -44,7 +32,7 @@ fn test_discover_stations_five() {
         "[exit]                                                [exit]",
     ];
     let stations = discover_stations(&lines);
-    assert_eq!(stations.ok().unwrap().len(), 5);
+    assert_eq!(stations.ok().unwrap().0.len(), 5);
 }
 
 #[test]
@@ -86,17 +74,15 @@ fn test_get_neighbors() {
         vec![' ', '[', ']', ' '],
         vec![' ', ' ', ' ', ' '],
     ];
-    let station = Station {
-        t: StationType::START,
-        loc: SourceLocation {
+    let station = Station::new(
+        "",
+        SourceLocation {
             line: 1,
             col: 1,
             len: 2,
         },
-        modifiers: StationModifiers::default(),
-        in_bays: Vec::new(),
-        out_bays: Vec::new(),
-    };
+        StationModifiers::default().with_priority(Direction::EAST),
+    );
     assert_eq!(
         get_neighbors(&map, &station),
         vec![
@@ -113,17 +99,15 @@ fn test_get_neighbors() {
 #[test]
 fn test_get_neighbors_on_border() {
     let map = vec![vec![' ', '[', ']', ' ']];
-    let mut station = Station {
-        t: StationType::START,
-        loc: SourceLocation {
+    let mut station = Station::new(
+        "",
+        SourceLocation {
             line: 0,
             col: 1,
             len: 2,
         },
-        modifiers: StationModifiers::default(),
-        in_bays: Vec::new(),
-        out_bays: Vec::new(),
-    };
+        StationModifiers::default(),
+    );
     assert_eq!(
         get_neighbors(&map, &station),
         vec![(0, 3, Direction::EAST), (0, 0, Direction::WEST),]
@@ -148,17 +132,15 @@ fn test_get_neighbors_on_border() {
 #[test]
 fn test_get_neighbors_none() {
     let map = vec![vec!['[', ']']];
-    let station = Station {
-        t: StationType::START,
-        loc: SourceLocation {
+    let station = Station::new(
+        "",
+        SourceLocation {
             line: 0,
             col: 0,
             len: 2,
         },
-        modifiers: StationModifiers::default(),
-        in_bays: Vec::new(),
-        out_bays: Vec::new(),
-    };
+        StationModifiers::default(),
+    );
     assert_eq!(get_neighbors(&map, &station), vec![])
 }
 
@@ -169,17 +151,15 @@ fn test_get_neighbors_reversed() {
         vec![' ', '[', ']', ' '],
         vec![' ', ' ', ' ', ' '],
     ];
-    let mut station = Station {
-        t: StationType::START,
-        loc: SourceLocation {
+    let mut station = Station::new(
+        "",
+        SourceLocation {
             line: 1,
             col: 1,
             len: 2,
         },
-        modifiers: StationModifiers::default().reverse(),
-        in_bays: Vec::new(),
-        out_bays: Vec::new(),
-    };
+        StationModifiers::default().reverse(),
+    );
     assert_eq!(
         get_neighbors(&map, &station),
         vec![
@@ -236,17 +216,15 @@ fn test_get_neighbors_with_direction() {
         vec![' ', '[', ']', ' '],
         vec![' ', ' ', ' ', ' '],
     ];
-    let mut station = Station {
-        t: StationType::START,
-        loc: SourceLocation {
+    let mut station = Station::new(
+        "",
+        SourceLocation {
             line: 1,
             col: 1,
             len: 2,
         },
-        modifiers: StationModifiers::default().with_priority(Direction::EAST),
-        in_bays: Vec::new(),
-        out_bays: Vec::new(),
-    };
+        StationModifiers::default().with_priority(Direction::EAST),
+    );
     assert_eq!(
         get_neighbors(&map, &station),
         vec![

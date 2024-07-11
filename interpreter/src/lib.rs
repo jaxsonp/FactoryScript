@@ -1,9 +1,10 @@
 pub static mut COLOR_OUTPUT: bool = false;
 pub static mut DEBUG_LEVEL: u8 = 0;
 
-mod macros;
+pub mod macros;
 pub mod pallet;
 pub mod preprocessor;
+pub mod runtime;
 pub mod station;
 
 use pallet::*;
@@ -11,10 +12,12 @@ use station::*;
 
 pub fn run<'a>(src: String) -> Result<(), Error> {
     let lines: Vec<&str> = src.split('\n').collect();
+
     debug!(2, "Preprocessing...");
-    let (mut stations, start_i) = preprocessor::process(&lines)?;
+    let (stations, start_i) = preprocessor::process(&lines)?;
 
     debug!(1, "Starting...");
+    runtime::execute(&stations, start_i)?;
     Ok(())
 }
 

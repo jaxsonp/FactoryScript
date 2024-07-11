@@ -10,19 +10,11 @@ use crate::*;
 ///
 /// Returns a tuple containing a vector of stations and the index of the start
 /// station, or an `Error` if unsuccessful
-pub fn process(lines: &Vec<&str>) -> Result<(Vec<Station>, usize), Error> {
+pub fn process<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize), Error> {
     // discovery
     debug!(3, "Discovering stations");
-    let mut stations = discover_stations(lines)?;
+    let (mut stations, start_index) = discover_stations(lines)?;
     debug!(3, "Found {} stations", stations.len());
-
-    // searching for start index
-    let mut start_index = 0;
-    for i in 0..stations.len() {
-        if matches!(stations[i].t, StationType::START) {
-            start_index = i;
-        }
-    }
 
     // generating 2d vector layout of source code
     let mut map: Vec<Vec<char>> = Vec::new();
@@ -70,8 +62,9 @@ pub fn process(lines: &Vec<&str>) -> Result<(Vec<Station>, usize), Error> {
     Ok((stations, start_index))
 }
 
-/// Finds all stations in the source code and parses their type and modifiers
-fn discover_stations(lines: &Vec<&str>) -> Result<Vec<Station>, Error> {
+/// Finds all stations in the source code, parses their type and modifiers, returns
+/// a vector of all stations and the index of the start station
+fn discover_stations<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize), Error> {
     // regex for matching stations
     let station_re =
         //Regex::new(r"(\[[a-zA-Z0-9- ]*(?::[!NSEW]*)?\])|(\{[a-zA-Z0-9- ]*(?::[!NSEW]*)?\})")(\[.*(?::[!NSEW]*)?\])|(\{.*(?::[!NSEW]*)?\})
@@ -80,6 +73,7 @@ fn discover_stations(lines: &Vec<&str>) -> Result<Vec<Station>, Error> {
 
     let mut stations: Vec<Station> = Vec::new();
     let mut start_found = false;
+    let mut start_index = 0;
     for i in 0..lines.len() {
         for m in station_re.find_iter(lines[i]) {
             let loc = SourceLocation {
@@ -94,13 +88,7 @@ fn discover_stations(lines: &Vec<&str>) -> Result<Vec<Station>, Error> {
             if text.starts_with('{') {
                 // assignment station
                 debug!(3, " - #{} @ {} {}", stations.len(), loc, text);
-                stations.push(Station {
-                    loc,
-                    t: StationType::ASSIGN(String::from(stripped)),
-                    modifiers: StationModifiers::default(),
-                    in_bays: Vec::new(),
-                    out_bays: Vec::new(),
-                });
+                stations.push(Station::new(stripped, loc, StationModifiers::default()));
                 continue;
             }
             let split: Vec<&str> = stripped.split(':').collect();
@@ -120,6 +108,7 @@ fn discover_stations(lines: &Vec<&str>) -> Result<Vec<Station>, Error> {
                         msg: String::from("Factory must only define one start station"),
                     });
                 }
+                start_index = i;
                 start_found = true;
             }
             for c in identifier.chars() {
@@ -173,13 +162,7 @@ fn discover_stations(lines: &Vec<&str>) -> Result<Vec<Station>, Error> {
             }
 
             debug!(3, " - #{} @ {} {}", stations.len(), loc, text);
-            stations.push(Station {
-                loc,
-                t: StationType::from_str(identifier),
-                modifiers,
-                in_bays: Vec::new(),
-                out_bays: Vec::new(),
-            });
+            stations.push(Station::new(identifier, loc, modifiers));
         }
     }
     if !start_found {
@@ -192,7 +175,7 @@ fn discover_stations(lines: &Vec<&str>) -> Result<Vec<Station>, Error> {
             msg: String::from("Unable to locate start station"),
         });
     }
-    return Ok(stations);
+    return Ok((stations, start_index));
 }
 
 /// helper function to get the index of a unicode character from the byte offset
