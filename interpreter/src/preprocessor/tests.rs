@@ -1,5 +1,3 @@
-use probe::evaluate_bay;
-
 use super::*;
 
 #[test]

@@ -5,7 +5,6 @@ pub mod probe;
 mod tests;
 
 use crate::*;
-use probe::Bay;
 
 /// Preprocesses a source string, validating the syntax and grammar
 ///
@@ -34,37 +33,35 @@ pub fn process(lines: &Vec<&str>) -> Result<(Vec<Station>, usize), Error> {
     // probing connected bays
     debug!(3, "Parsing station bays");
     for i in 0..stations.len() {
-        debug!(3, " - #{i}'s bays",);
+        debug!(3, " - #{i}'s inputs:",);
         for neighbor in get_neighbors(&map, &mut stations[i]) {
-            // checking if each neighbor is a bay and what type
-            if let Some(bay) = probe::evaluate_bay(&map, neighbor)? {
-                match bay {
-                    Bay::In => {
-                        debug!(3, "    <");
-                    }
-                    Bay::Out(line, col) => {
-                        // getting station at dest position
-                        let mut dest_station = 0;
-                        let mut dest_is_station = false;
-                        for j in 0..stations.len() {
-                            if line == stations[j].loc.line
-                                && col >= stations[j].loc.col
-                                && col < stations[j].loc.col + stations[j].loc.len
-                            {
-                                dest_station = j;
-                                dest_is_station = true;
-                                break;
-                            }
-                        }
-                        if !dest_is_station {
-                            return Err(Error {
-                                t: ErrorType::SyntaxError(SourceLocation { line, col, len: 1 }),
-                                msg: String::from("Dangling conveyor belt"),
-                            });
-                        }
-                        debug!(3, "    > #{}", dest_station);
+            // checking if each neighbor is an input bay and finding the origin of the conveyor belt
+            if let Some(origin_pos) = probe::evaluate_bay(&map, neighbor) {
+                let mut origin_station: Option<usize> = None;
+                for j in 0..stations.len() {
+                    if origin_pos.0 == stations[j].loc.line
+                        && origin_pos.1 >= stations[j].loc.col
+                        && origin_pos.1 < stations[j].loc.col + stations[j].loc.len
+                    {
+                        origin_station = Some(j);
+                        break;
                     }
                 }
+                if origin_station.is_none() {
+                    return Err(Error {
+                        t: ErrorType::SyntaxError(SourceLocation {
+                            line: origin_pos.0,
+                            col: origin_pos.1,
+                            len: 1,
+                        }),
+                        msg: String::from("Expected station"),
+                    });
+                }
+                let origin_station = origin_station.unwrap();
+                let in_bay = stations[i].in_bays.len();
+                stations[origin_station].out_bays.push((i, in_bay));
+                stations[i].new_in_bay();
+                debug!(3, "    - conveyor belt from #{origin_station}");
             }
         }
     }
@@ -181,7 +178,7 @@ fn discover_stations(lines: &Vec<&str>) -> Result<Vec<Station>, Error> {
 fn get_char_index_from_byte_offset(byte_offset: usize, s: &str) -> usize {
     let s = String::from(s);
     let mut char_index = 0;
-    for (pos, c) in s.char_indices() {
+    for (pos, _) in s.char_indices() {
         if byte_offset <= pos {
             return char_index;
         }

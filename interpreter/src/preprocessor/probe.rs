@@ -1,176 +1,138 @@
 use crate::*;
 
+#[allow(dead_code)]
 const BELTS: &str = "─│┌┐└┘═║╔╗╚╝";
-//const SINGLE_BELTS: &str = "─│┌┐└┘";
+const SINGLE_BELTS: &str = "─│┌┐└┘";
 const DOUBLE_BELTS: &str = "═║╔╗╚╝";
 const NORTH_BELTS: &str = "│└┘║╚╝";
 const EAST_BELTS: &str = "─┌└═╔╚";
 const SOUTH_BELTS: &str = "│┌┐║╔╗";
 const WEST_BELTS: &str = "─┐┘═╗╝";
 
-/// Given a starting position around a station, check if it is an input or output
-/// bay, and if it is find its destination
+/// Given a starting position around a station, check if it is an input bay and
+/// if it is find the origin of the conveyor belt
 ///
-/// If successful returns an optional `Bay` struct which contains info
+/// Returns an optional tuple of the origin position if it is an input bay
 pub fn evaluate_bay(
     map: &Vec<Vec<char>>,
     start: (usize, usize, Direction),
-) -> Result<Option<Bay>, Error> {
+) -> Option<(usize, usize)> {
     let c = map[start.0][start.1];
 
-    // checking if belt character
-    if !BELTS.contains(c) {
-        return Ok(None); // not a belt
+    // checking if not a single belt character
+    if !SINGLE_BELTS.contains(c) {
+        return None;
     }
 
     // checking if pointing into station
     match start.2 {
         Direction::NORTH => {
             if !SOUTH_BELTS.contains(c) {
-                return Ok(None);
+                return None;
             }
         }
         Direction::EAST => {
             if !WEST_BELTS.contains(c) {
-                return Ok(None);
+                return None;
             }
         }
         Direction::SOUTH => {
             if !NORTH_BELTS.contains(c) {
-                return Ok(None);
+                return None;
             }
         }
         Direction::WEST => {
             if !EAST_BELTS.contains(c) {
-                return Ok(None);
+                return None;
             }
         }
     }
 
-    if DOUBLE_BELTS.contains(c) {
-        // output belt (═)
-        let dest = probe(map, start)?;
-        return Ok(Some(Bay::Out(dest.0, dest.1)));
-    } else {
-        // input belt (─)
-        return Ok(Some(Bay::In));
-    }
+    let dest = probe(map, start);
+    return dest;
 }
 
-/// follows a path of block drawing characters until its end
-pub fn probe(
-    map: &Vec<Vec<char>>,
-    start: (usize, usize, Direction),
-) -> Result<(usize, usize), Error> {
+/// follows a path of block drawing characters until it it hits the end, returning
+/// the position of the end if it is a valid conveyor belt
+pub fn probe(map: &Vec<Vec<char>>, start: (usize, usize, Direction)) -> Option<(usize, usize)> {
     let mut pos = (start.0, start.1);
     let mut facing = start.2;
     debug!(4, "      probing starting at {}:{}", pos.0, pos.1);
 
-    // error to return if unexpected double belt is found
-    let unexpected_double_err = Error {
-        t: ErrorType::SyntaxError(SourceLocation {
-            line: pos.0,
-            col: pos.1,
-            len: 1,
-        }),
-        msg: String::from("Unexpected double conveyor belt"),
-    };
-
     let mut c = map[pos.0][pos.1];
-    match facing {
-        Direction::NORTH => match c {
-            '║' => {}
-            '╔' => facing = Direction::EAST,
-            '╗' => facing = Direction::WEST,
-            _ => panic!("Output bay didnt start with double belt"),
-        },
-        Direction::EAST => match c {
-            '═' => {}
-            '╝' => facing = Direction::NORTH,
-            '╗' => facing = Direction::SOUTH,
-            _ => panic!("Output bay didnt start with double belt"),
-        },
-        Direction::SOUTH => match c {
-            '║' => {}
-            '╚' => facing = Direction::EAST,
-            '╝' => facing = Direction::WEST,
-            _ => panic!("Output bay didnt start with double belt"),
-        },
-        Direction::WEST => match c {
-            '═' => {}
-            '╚' => facing = Direction::NORTH,
-            '╔' => facing = Direction::SOUTH,
-            _ => panic!("Output bay didnt start with double belt"),
-        },
-    }
     loop {
-        // checking out next char
+        // checking if current char connects to previous char and turning
+        if facing == Direction::NORTH && SOUTH_BELTS.contains(c) {
+            match c {
+                '│' | '║' => {}
+                '┌' | '╔' => facing = Direction::EAST,
+                '┐' | '╗' => facing = Direction::WEST,
+                _ => panic!(),
+            }
+        } else if facing == Direction::EAST && WEST_BELTS.contains(c) {
+            match c {
+                '─' | '═' => {}
+                '┘' | '╝' => facing = Direction::NORTH,
+                '┐' | '╗' => facing = Direction::SOUTH,
+                _ => panic!(),
+            }
+        } else if facing == Direction::SOUTH && NORTH_BELTS.contains(c) {
+            match c {
+                '│' | '║' => {}
+                '└' | '╚' => facing = Direction::EAST,
+                '┘' | '╝' => facing = Direction::WEST,
+                _ => panic!(),
+            }
+        } else if facing == Direction::WEST && EAST_BELTS.contains(c) {
+            match c {
+                '─' | '═' => {}
+                '└' | '╚' => facing = Direction::NORTH,
+                '┌' | '╔' => facing = Direction::SOUTH,
+                _ => panic!(),
+            }
+        } else {
+            return None;
+        }
+        debug!(
+            4,
+            "       - moved to {}:{}, now facing {}", pos.0, pos.1, facing
+        );
+
+        // moving to the next char
         match facing {
             Direction::NORTH => {
+                if pos.0 == 0 {
+                    return None;
+                }
                 pos.0 -= 1;
             }
             Direction::EAST => {
                 pos.1 += 1;
+                if pos.1 >= map[pos.0].len() {
+                    return None;
+                }
             }
             Direction::SOUTH => {
                 pos.0 += 1;
+                if pos.0 >= map.len() {
+                    return None;
+                }
             }
             Direction::WEST => {
+                if pos.1 == 0 {
+                    return None;
+                }
                 pos.1 -= 1;
             }
         }
-        c = map[pos.0][pos.1];
-
-        // checking if it connects to previous char and turning if necessary
-        if facing == Direction::NORTH && SOUTH_BELTS.contains(c) {
-            match c {
-                '│' => {}
-                '┌' => facing = Direction::EAST,
-                '┐' => facing = Direction::WEST,
-                _ => return Err(unexpected_double_err),
-            }
-        } else if facing == Direction::EAST && WEST_BELTS.contains(c) {
-            match c {
-                '─' => {}
-                '┘' => facing = Direction::NORTH,
-                '┐' => facing = Direction::SOUTH,
-                _ => return Err(unexpected_double_err),
-            }
-        } else if facing == Direction::SOUTH && NORTH_BELTS.contains(c) {
-            match c {
-                '│' => {}
-                '└' => facing = Direction::EAST,
-                '┘' => facing = Direction::WEST,
-                _ => return Err(unexpected_double_err),
-            }
-        } else if facing == Direction::WEST && EAST_BELTS.contains(c) {
-            match c {
-                '─' => {}
-                '└' => facing = Direction::NORTH,
-                '┌' => facing = Direction::SOUTH,
-                _ => return Err(unexpected_double_err),
-            }
-        } else {
-            // end of this path
-            debug!(
-                4,
-                "       - path ended at {}:{} with char \'{}\'", pos.0, pos.1, c
-            );
-            break;
+        // if the last character was a double belt, we reached the origin
+        if DOUBLE_BELTS.contains(c) {
+            debug!(4, "       - path ended at {}:{}", pos.0, pos.1);
+            return Some(pos);
         }
-        debug!(
-            4,
-            "       - moved to {}:{}, facing {}", pos.0, pos.1, facing
-        );
+        // moving
+        c = map[pos.0][pos.1];
     }
-    return Ok(pos);
-}
-
-/// helper struct to conveniently handle information about a stations bays,
-/// whether its an input or output, and its destination pos if its an ouput
-pub enum Bay {
-    In,
-    Out(usize, usize),
 }
 
 #[cfg(test)]
@@ -180,97 +142,46 @@ mod tests {
     #[test]
     fn test_probe() {
         let map = vec![
-            vec!['═', '─', '─', '┐'],
+            vec!['─', '─', '─', '┐'],
             vec![' ', '┌', '┐', '│'],
-            vec![' ', '┘', '└', '┘'],
+            vec!['╚', '┘', '└', '┘'],
         ];
-        assert_eq!(probe(&map, (0, 0, Direction::EAST)).ok().unwrap(), (2, 0));
+        assert_eq!(probe(&map, (0, 0, Direction::EAST)).unwrap(), (1, 0));
+        assert_eq!(probe(&map, (0, 3, Direction::EAST)).unwrap(), (1, 0));
     }
 
     #[test]
-    fn test_evaluate_bay_none() {
-        let map = vec![
-            vec![' ', ' ', ' ', ' '],
-            vec![' ', '[', ']', ' '],
-            vec![' ', ' ', ' ', ' '],
-        ];
-        assert!(matches!(
-            evaluate_bay(&map, (0, 1, Direction::NORTH)),
-            Ok(None)
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (1, 0, Direction::EAST)),
-            Ok(None)
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (0, 3, Direction::WEST)),
-            Ok(None)
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (2, 1, Direction::SOUTH)),
-            Ok(None)
-        ));
+    fn test_probe_dangling() {
+        let map = vec![vec!['─', '┐'], vec![' ', '─']];
+        assert!(probe(&map, (0, 0, Direction::EAST)).is_none());
+        assert!(probe(&map, (1, 1, Direction::WEST)).is_none());
     }
 
     #[test]
-    fn test_evaluate_bay_in() {
-        let map = vec![
-            vec![' ', '┐', '│', '┌', ' '],
-            vec!['─', '[', ' ', ']', '─'],
-            vec![' ', '┘', '│', '└', ' '],
-        ];
-        assert!(matches!(
-            evaluate_bay(&map, (0, 1, Direction::NORTH)),
-            Ok(Some(Bay::In))
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (0, 2, Direction::NORTH)),
-            Ok(Some(Bay::In))
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (0, 3, Direction::NORTH)),
-            Ok(Some(Bay::In))
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (1, 0, Direction::EAST)),
-            Ok(Some(Bay::In))
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (1, 4, Direction::WEST)),
-            Ok(Some(Bay::In))
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (2, 1, Direction::SOUTH)),
-            Ok(Some(Bay::In))
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (2, 2, Direction::SOUTH)),
-            Ok(Some(Bay::In))
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (2, 3, Direction::SOUTH)),
-            Ok(Some(Bay::In))
-        ));
+    fn test_probe_out_of_bounds() {
+        let map = vec![vec!['─', '┐']];
+        assert!(probe(&map, (0, 0, Direction::EAST)).is_none());
+        assert!(probe(&map, (0, 1, Direction::NORTH)).is_none());
     }
 
     #[test]
-    fn test_evaluate_bay_out() {
+    fn test_evaluate_bay() {
         let map = vec![
-            vec![' ', '╗', '┌', '┐'],
-            vec!['╔', '[', ']', '│'],
-            vec!['└', '╚', '─', '┘'],
+            vec![' ', '│', '┌', '═'],
+            vec!['║', '[', ']', ' '],
+            vec!['└', '┘', '└', '╝'],
         ];
-        assert!(matches!(
-            evaluate_bay(&map, (0, 1, Direction::NORTH)),
-            Ok(Some(Bay::Out(0, 0)))
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (1, 0, Direction::WEST)),
-            Ok(Some(Bay::Out(2, 1)))
-        ));
-        assert!(matches!(
-            evaluate_bay(&map, (2, 1, Direction::SOUTH)),
-            Ok(Some(Bay::Out(1, 2)))
-        ));
+        assert_eq!(
+            evaluate_bay(&map, (2, 1, Direction::SOUTH)).unwrap(),
+            (0, 0)
+        );
+        assert_eq!(
+            evaluate_bay(&map, (2, 2, Direction::SOUTH)).unwrap(),
+            (1, 3)
+        );
+        assert!(evaluate_bay(&map, (1, 0, Direction::WEST)).is_none());
+        assert!(evaluate_bay(&map, (1, 3, Direction::EAST)).is_none());
+        assert!(evaluate_bay(&map, (0, 1, Direction::NORTH)).is_none());
+        assert!(evaluate_bay(&map, (0, 2, Direction::NORTH)).is_none());
     }
 }

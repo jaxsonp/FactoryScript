@@ -15,6 +15,11 @@ pub struct Station {
     /// Map of each output bay connection in the form (station_index, in_bay_index)
     pub out_bays: Vec<(usize, usize)>,
 }
+impl Station {
+    pub fn new_in_bay(&mut self) {
+        self.in_bays.push(VecDeque::new());
+    }
+}
 impl std::fmt::Display for Station {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} @ {}", self.t, self.loc)
