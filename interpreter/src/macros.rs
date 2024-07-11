@@ -36,10 +36,11 @@ macro_rules! print_err {
 		unsafe {
 			if COLOR_OUTPUT {
 				use inline_colorization::{color_red, color_reset};
+				print!("{color_red}");
 				print!($msg, $($args),*);
 				println!("{color_reset}");
 			} else {
-				print!("ERROR: ");
+				print!("ERROR! ");
 				println!($msg, $($args),*);
 			}
 		}
@@ -48,11 +49,11 @@ macro_rules! print_err {
 		unsafe {
 			if COLOR_OUTPUT {
 				use inline_colorization::{color_red, color_reset};
-				print!("{color_red}ERROR: ");
+				print!("{color_red}");
 				print!($msg);
 				println!("{color_reset}");
 			} else {
-				print!("ERROR: ");
+				print!("ERROR! ");
 				println!($msg);
 			}
 		}

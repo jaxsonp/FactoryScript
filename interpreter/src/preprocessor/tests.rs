@@ -17,20 +17,16 @@ fn test_discover_stations() {
 }
 
 #[test]
-fn test_discover_stations_two() {
-    let lines: Vec<&str> = vec!["[start] [exit]"];
-    let stations = discover_stations(&lines);
-    assert_eq!(stations.ok().unwrap().len(), 2);
-}
-
-#[test]
 fn test_discover_stations_assign() {
     let lines: Vec<&str> = vec!["[start] {test}"];
     let stations = discover_stations(&lines).ok().unwrap();
+    assert_eq!(stations.len(), 2);
     let station = &stations[1];
     #[allow(unused_variables)]
-    let s = String::from("test");
-    assert!(matches!(&station.t, StationType::ASSIGN(_s)));
+    {
+        let s = String::from("test");
+        assert!(matches!(&station.t, StationType::ASSIGN(s)));
+    }
 }
 
 #[test]

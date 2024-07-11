@@ -36,7 +36,7 @@ pub fn process(lines: &Vec<&str>) -> Result<(Vec<Station>, usize), Error> {
         debug!(3, " - #{i}'s inputs:",);
         for neighbor in get_neighbors(&map, &mut stations[i]) {
             // checking if each neighbor is an input bay and finding the origin of the conveyor belt
-            if let Some(origin_pos) = probe::evaluate_bay(&map, neighbor) {
+            if let Some(origin_pos) = probe::evaluate_bay(&map, neighbor)? {
                 let mut origin_station: Option<usize> = None;
                 for j in 0..stations.len() {
                     if origin_pos.0 == stations[j].loc.line
@@ -54,7 +54,7 @@ pub fn process(lines: &Vec<&str>) -> Result<(Vec<Station>, usize), Error> {
                             col: origin_pos.1,
                             len: 1,
                         }),
-                        msg: String::from("Expected station"),
+                        msg: String::from("Dangling conveyor belt, expected station"),
                     });
                 }
                 let origin_station = origin_station.unwrap();
@@ -74,49 +74,77 @@ pub fn process(lines: &Vec<&str>) -> Result<(Vec<Station>, usize), Error> {
 fn discover_stations(lines: &Vec<&str>) -> Result<Vec<Station>, Error> {
     // regex for matching stations
     let station_re =
-        Regex::new(r"(\[[a-zA-Z0-9- ]*(?::[!NSEW]*)?\])|(\{[a-zA-Z0-9- ]*(?::[!NSEW]*)?\})")
+        //Regex::new(r"(\[[a-zA-Z0-9- ]*(?::[!NSEW]*)?\])|(\{[a-zA-Z0-9- ]*(?::[!NSEW]*)?\})")(\[.*(?::[!NSEW]*)?\])|(\{.*(?::[!NSEW]*)?\})
+        Regex::new(r"(\[\s*[^\[\]\{\}]*(?::[!NSEW]*)?\s*\])|(\{[^\[\]\{\}]*\})")
             .unwrap();
 
     let mut stations: Vec<Station> = Vec::new();
     let mut start_found = false;
     for i in 0..lines.len() {
         for m in station_re.find_iter(lines[i]) {
-            // string parsing
-            let text = m.as_str();
-            let stripped = &text[1..text.len() - 1];
-            let mut split = stripped.split(':');
-            let name = split.next().unwrap();
             let loc = SourceLocation {
                 line: i,
                 col: get_char_index_from_byte_offset(m.start(), lines[i]),
                 len: m.len(),
             };
-            debug!(3, " - #{} @ {} {}", stations.len(), loc, text);
 
-            if name == "start" {
+            // string parsing
+            let text = m.as_str();
+            let stripped = &text[1..text.len() - 1];
+            if text.starts_with('{') {
+                // assignment station
+                debug!(3, " - #{} @ {} {}", stations.len(), loc, text);
+                stations.push(Station {
+                    loc,
+                    t: StationType::ASSIGN(String::from(stripped)),
+                    modifiers: StationModifiers::default(),
+                    in_bays: Vec::new(),
+                    out_bays: Vec::new(),
+                });
+                continue;
+            }
+            let split: Vec<&str> = stripped.split(':').collect();
+            if split.len() > 2 {
+                return Err(Error {
+                    t: ErrorType::SyntaxError(loc),
+                    msg: String::from(
+                        "Invalid station, modifiers must be of the form \"[<NAME>:<FLAGS>]\"",
+                    ),
+                });
+            }
+            let identifier = split[0];
+            if identifier == "start" {
                 if start_found {
                     return Err(Error {
                         t: ErrorType::SyntaxError(loc),
-                        msg: String::from("Defined multiple start stations"),
+                        msg: String::from("Factory must only define one start station"),
                     });
                 }
                 start_found = true;
             }
+            for c in identifier.chars() {
+                if identifier != "" && !c.is_ascii_alphanumeric() && c != '-' && c != ' ' {
+                    return Err(Error { t: ErrorType::SyntaxError(loc), msg: String::from("Station identifiers must only contain a-z, A-Z, 0-9, dashes, and spaces.") });
+                }
+            }
 
             // parsing station modifiers
             let mut modifiers = StationModifiers::default();
-            if let Some(mod_string) = split.next() {
+            if split.len() == 2 {
+                let mod_string = split[1];
                 if mod_string.contains('!') {
                     modifiers.reverse = true;
                     debug!(4, "   - reverse modifier");
                 }
                 let mut direction_specified = false;
-                // closure that checks if a direction has already been specified
+                // closure that checks if a direction modifier has already been specified
                 let mut check_multiple_directions = || -> Result<(), Error> {
                     if direction_specified {
                         return Err(Error {
                             t: ErrorType::SyntaxError(loc),
-                            msg: String::from("Specified multiple direction priority modifiers"),
+                            msg: String::from(
+                                "Each station must contain only one direction priority modifier",
+                            ),
                         });
                     }
                     direction_specified = true;
@@ -144,13 +172,10 @@ fn discover_stations(lines: &Vec<&str>) -> Result<Vec<Station>, Error> {
                 }
             }
 
+            debug!(3, " - #{} @ {} {}", stations.len(), loc, text);
             stations.push(Station {
                 loc,
-                t: if text.starts_with('{') {
-                    StationType::ASSIGN(String::from(stripped))
-                } else {
-                    StationType::from_str(name)
-                },
+                t: StationType::from_str(identifier),
                 modifiers,
                 in_bays: Vec::new(),
                 out_bays: Vec::new(),
@@ -164,7 +189,7 @@ fn discover_stations(lines: &Vec<&str>) -> Result<Vec<Station>, Error> {
                 col: 0,
                 len: 0,
             }),
-            msg: String::from("Missing a start station"),
+            msg: String::from("Unable to locate start station"),
         });
     }
     return Ok(stations);
@@ -194,7 +219,7 @@ pub fn get_neighbors(map: &Vec<Vec<char>>, station: &Station) -> Vec<(usize, usi
     let mut northern_neighbors: Vec<(usize, usize, Direction)> = Vec::new();
     if station.loc.line > 0 {
         for i in 0..station.loc.len {
-            if i < map[station.loc.line - 1].len() {
+            if station.loc.col + i < map[station.loc.line - 1].len() {
                 northern_neighbors.push((
                     station.loc.line - 1,
                     station.loc.col + i,
@@ -214,7 +239,7 @@ pub fn get_neighbors(map: &Vec<Vec<char>>, station: &Station) -> Vec<(usize, usi
     let mut southern_neighbors: Vec<(usize, usize, Direction)> = Vec::new();
     if station.loc.line < (map.len() - 1) {
         for i in (0..station.loc.len).rev() {
-            if i < map[station.loc.line + 1].len() {
+            if station.loc.col + i < map[station.loc.line + 1].len() {
                 southern_neighbors.push((
                     station.loc.line + 1,
                     station.loc.col + i,
@@ -285,6 +310,5 @@ pub fn get_neighbors(map: &Vec<Vec<char>>, station: &Station) -> Vec<(usize, usi
             }
         }
     }
-
     return neighbors;
 }
