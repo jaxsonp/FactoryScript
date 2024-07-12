@@ -53,27 +53,25 @@ static PRINT: StationType = StationType {
 };
 fn print_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match &pallets[0] {
-        Some(Pallet::Empty) => {
-            println!();
-        }
+        Some(Pallet::Empty) => {}
         Some(Pallet::Bool(b)) => {
             if *b {
-                println!("true");
+                print!("true");
             } else {
-                println!("false");
+                print!("false");
             }
         }
         Some(Pallet::Char(c)) => {
-            println!("{c}");
+            print!("{c}");
         }
         Some(Pallet::String(s)) => {
-            println!("{s}");
+            print!("{s}");
         }
         Some(Pallet::Int(i)) => {
-            println!("{i}");
+            print!("{i}");
         }
         Some(Pallet::Float(f)) => {
-            println!("{f:.8}");
+            print!("{f:.8}");
         }
         None => return Err(String::from("Missing pallet in print")),
     }

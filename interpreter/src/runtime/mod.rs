@@ -96,33 +96,9 @@ pub fn execute(
                 }
             }
         }
-        debug!(2, "Step {t} completed ( ms)");
+        debug!(3, "Step {t} completed ( ms)");
         t += 1;
     }
     debug!(2, "No remaining moving pallets");
-    debug!(1, "Program finished successfully");
     return Ok(());
 }
-
-// ----------------
-/*
-struct myStruct {
-    x: u32,
-}
-impl myStruct {
-    pub fn print(input: &str) {
-        print!("{input}");
-    }
-    pub fn print2(&self, input: &str) {
-        print!("{input}");
-        print!("x: {}", self.x);
-    }
-}
-
-fn main() {
-    myStruct::print("hi");
-    let a = myStruct { x: 3 };
-    myStruct::print2(&a, "hi");
-    a.print2("hi");
-}
-*/

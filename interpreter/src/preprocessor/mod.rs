@@ -71,7 +71,7 @@ pub fn process<'a>(
 /// Finds all stations in the source code, parses their type and modifiers, returns
 /// a vector of all stations, the start station's index, and the assign table
 /// (a hashmap containing the values of every assign station)
-fn discover_stations<'a>(
+fn discover_stations(
     lines: &Vec<&str>,
     ns: &Namespace,
 ) -> Result<(Vec<Station>, usize, HashMap<usize, Pallet>), Error> {
