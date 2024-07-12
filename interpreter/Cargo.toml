@@ -9,7 +9,7 @@ repository.workspace = true
 default-run = "interpreter"
 
 [dependencies]
-fs-core = { path = "../fs-core" }
+core = { path = "../core" }
 clap = { version = "4.5.9", features = ["derive"] }
 inline_colorization = "0.1.6"
 regex = "1.10.5"

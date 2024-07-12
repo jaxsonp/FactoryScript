@@ -107,7 +107,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b6a852b24ab71dffc585bcb46eaf7959d175cb865a7152e35b348d1b2960422"
 
 [[package]]
-name = "fs-core"
+name = "core"
 version = "0.1.0"
 
 [[package]]
@@ -127,7 +127,7 @@ name = "interpreter"
 version = "0.1.0"
 dependencies = [
  "clap",
- "fs-core",
+ "core",
  "inline_colorization",
  "lazy_static",
  "paste",
