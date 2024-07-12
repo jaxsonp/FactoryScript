@@ -7,7 +7,7 @@ pub struct Station {
     /// Location of the station in source code
     pub loc: SourceLocation,
     /// Station functionality and type information
-    pub station_type: &'static StationType<'static>,
+    pub logic: &'static StationType<'static>,
     /// Modifiers duh
     pub modifiers: StationModifiers,
     /// Queues for each input bay
@@ -26,7 +26,7 @@ impl Station {
             if identifier == name.id {
                 return Ok(Self {
                     loc,
-                    station_type: name,
+                    logic: name,
                     modifiers,
                     in_bays: Vec::new(),
                     out_bays: Vec::new(),

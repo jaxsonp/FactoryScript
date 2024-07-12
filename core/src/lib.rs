@@ -32,7 +32,7 @@ pub struct StationType<'a> {
     pub output: bool,
     /// Station's procedure, takes a vector of input pallets and returns an optional
     /// pallet if successful, and an error message in a String if not
-    pub procedure: fn(pallets: &Vec<Pallet>) -> Result<Option<Pallet>, String>,
+    pub procedure: fn(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String>,
 }
 
 /// Instance of a pallet
@@ -44,6 +44,22 @@ pub enum Pallet {
     String(String),
     Int(i32),
     Float(f32),
+}
+impl std::fmt::Display for Pallet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Pallet::Empty => String::from("Pallet()"),
+                Pallet::Bool(b) => format!("Pallet({})", if *b { "true" } else { "else" }),
+                Pallet::Char(c) => format!("Pallet('{}')", c),
+                Pallet::String(s) => format!("Pallet(\"{}\")", s),
+                Pallet::Int(i) => format!("Pallet({})", i),
+                Pallet::Float(f) => format!("Pallet({})", f),
+            },
+        )
+    }
 }
 
 /* BROKEN

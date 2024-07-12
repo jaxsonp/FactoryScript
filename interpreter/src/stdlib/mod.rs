@@ -10,7 +10,7 @@ lazy_static! {
 }
 
 /// Common procedure that returns nothign
-fn none_procedure(_: &Vec<Pallet>) -> Result<Option<Pallet>, String> {
+fn none_procedure(_: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     return Ok(None);
 }
 
@@ -20,7 +20,7 @@ static START: StationType = StationType {
     output: true,
     procedure: start_procedure,
 };
-fn start_procedure(_: &Vec<Pallet>) -> Result<Option<Pallet>, String> {
+fn start_procedure(_: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     return Ok(Some(Pallet::Empty));
 }
 
@@ -51,30 +51,31 @@ static PRINT: StationType = StationType {
     output: false,
     procedure: print_procedure,
 };
-fn print_procedure(pallets: &Vec<Pallet>) -> Result<Option<Pallet>, String> {
-    match pallets.iter().next().unwrap() {
-        Pallet::Empty => {
+fn print_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match &pallets[0] {
+        Some(Pallet::Empty) => {
             println!();
         }
-        Pallet::Bool(b) => {
+        Some(Pallet::Bool(b)) => {
             if *b {
                 println!("true");
             } else {
                 println!("false");
             }
         }
-        Pallet::Char(c) => {
+        Some(Pallet::Char(c)) => {
             println!("{c}");
         }
-        Pallet::String(s) => {
+        Some(Pallet::String(s)) => {
             println!("{s}");
         }
-        Pallet::Int(i) => {
+        Some(Pallet::Int(i)) => {
             println!("{i}");
         }
-        Pallet::Float(f) => {
+        Some(Pallet::Float(f)) => {
             println!("{f:.8}");
         }
+        None => return Err(String::from("Missing pallet in print")),
     }
     return Ok(None);
 }
@@ -85,7 +86,7 @@ static PRINTLN: StationType = StationType {
     output: false,
     procedure: println_procedure,
 };
-fn println_procedure(pallets: &Vec<Pallet>) -> Result<Option<Pallet>, String> {
+fn println_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     print_procedure(pallets)?;
     println!();
     return Ok(None);

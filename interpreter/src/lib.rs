@@ -23,7 +23,7 @@ pub fn run<'a>(src: String) -> Result<(), Error> {
     let lines: Vec<&str> = src.split('\n').collect();
     let (mut stations, start_i, assign_table) = preprocessor::process(&lines, &namespace)?;
 
-    debug!(1, "Starting...");
+    debug!(1, "Starting");
     runtime::execute(&mut stations, start_i, &assign_table)?;
     Ok(())
 }

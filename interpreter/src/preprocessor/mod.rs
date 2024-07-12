@@ -98,7 +98,6 @@ fn discover_stations<'a>(
             let stripped = &text[1..text.len() - 1];
             if text.starts_with('{') {
                 // assignment station
-                println!("assign!");
                 debug!(3, " - #{} @ {} {}", stations.len(), loc, text);
                 assign_table.insert(stations.len(), Pallet::String(String::from(stripped)));
                 stations.push(Station::new(

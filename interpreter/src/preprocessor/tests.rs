@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn test_discover_stations() {
     let lines: Vec<&str> = vec!["[start]"];
-    let (stations, start_i, _) = discover_stations(&lines, &stdlib::NAMESPACE).ok().unwrap();
+    let (stations, start_i, _) = discover_stations(&lines, &stdlib::NAMES).ok().unwrap();
     assert_eq!(start_i, 0);
     let station = &stations[0];
     assert_eq!(
@@ -19,7 +19,7 @@ fn test_discover_stations() {
 #[test]
 fn test_discover_stations_four() {
     let lines: Vec<&str> = vec!["[exit][exit]", "[start][exit]"];
-    let (stations, _, _) = discover_stations(&lines, &stdlib::NAMESPACE).ok().unwrap();
+    let (stations, _, _) = discover_stations(&lines, &stdlib::NAMES).ok().unwrap();
     assert_eq!(stations.len(), 4);
 }
 
@@ -30,21 +30,21 @@ fn test_discover_stations_five() {
         "                         [exit]                             ",
         "[exit]                                                [exit]",
     ];
-    let stations = discover_stations(&lines, &stdlib::NAMESPACE);
+    let stations = discover_stations(&lines, &stdlib::NAMES);
     assert_eq!(stations.ok().unwrap().0.len(), 5);
 }
 
 #[test]
 fn test_discover_stations_none() {
     let lines: Vec<&str> = vec![""];
-    let stations = discover_stations(&lines, &stdlib::NAMESPACE);
+    let stations = discover_stations(&lines, &stdlib::NAMES);
     assert!(stations.is_err());
 }
 
 #[test]
 fn test_discover_stations_assign() {
     let lines: Vec<&str> = vec!["[start] {hello world}"];
-    let (_, _, assign_table) = dbg!(discover_stations(&lines, &stdlib::NAMESPACE))
+    let (_, _, assign_table) = dbg!(discover_stations(&lines, &stdlib::NAMES))
         .ok()
         .unwrap();
     assert!(matches!(assign_table.get(&1).unwrap(), Pallet::String(_)));
@@ -53,7 +53,7 @@ fn test_discover_stations_assign() {
 #[test]
 fn test_discover_stations_two_starts() {
     let lines: Vec<&str> = vec!["[start] [start]"];
-    let stations = discover_stations(&lines, &stdlib::NAMESPACE);
+    let stations = discover_stations(&lines, &stdlib::NAMES);
     assert!(stations.is_err());
 }
 
@@ -91,7 +91,7 @@ fn test_get_neighbors() {
             len: 2,
         },
         StationModifiers::default(),
-        &stdlib::NAMESPACE,
+        &stdlib::NAMES,
     )
     .unwrap();
     assert_eq!(
@@ -118,7 +118,7 @@ fn test_get_neighbors_on_border() {
             len: 2,
         },
         StationModifiers::default(),
-        &stdlib::NAMESPACE,
+        &stdlib::NAMES,
     )
     .unwrap();
     assert_eq!(
@@ -153,7 +153,7 @@ fn test_get_neighbors_none() {
             len: 2,
         },
         StationModifiers::default(),
-        &stdlib::NAMESPACE,
+        &stdlib::NAMES,
     )
     .unwrap();
     assert_eq!(get_neighbors(&map, &station), vec![])
@@ -174,7 +174,7 @@ fn test_get_neighbors_reversed() {
             len: 2,
         },
         StationModifiers::default().reverse(),
-        &stdlib::NAMESPACE,
+        &stdlib::NAMES,
     )
     .unwrap();
     assert_eq!(
@@ -241,7 +241,7 @@ fn test_get_neighbors_with_direction() {
             len: 2,
         },
         StationModifiers::default().with_priority(Direction::EAST),
-        &stdlib::NAMESPACE,
+        &stdlib::NAMES,
     )
     .unwrap();
     assert_eq!(
