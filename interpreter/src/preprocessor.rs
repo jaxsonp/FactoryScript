@@ -10,10 +10,10 @@ use crate::*;
 ///
 /// Returns a tuple containing a vector of stations and the index of the start
 /// station, or an `Error` if unsuccessful
-pub fn process<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize), Error> {
+pub fn process<'a>(lines: &Vec<&str>, ns: &Namespace) -> Result<(Vec<Station>, usize), Error> {
     // discovery
     debug!(3, "Discovering stations");
-    let (mut stations, start_index) = discover_stations(lines)?;
+    let (mut stations, start_index) = discover_stations(lines, ns)?;
     debug!(3, "Found {} stations", stations.len());
 
     // generating 2d vector layout of source code
@@ -41,11 +41,12 @@ pub fn process<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize), Error
                 }
                 if origin_station.is_none() {
                     return Err(Error {
-                        t: ErrorType::SyntaxError(SourceLocation {
+                        t: ErrorType::SyntaxError,
+                        loc: SourceLocation {
                             line: origin_pos.0,
                             col: origin_pos.1,
                             len: 1,
-                        }),
+                        },
                         msg: String::from("Dangling conveyor belt, expected station"),
                     });
                 }
@@ -64,7 +65,10 @@ pub fn process<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize), Error
 
 /// Finds all stations in the source code, parses their type and modifiers, returns
 /// a vector of all stations and the index of the start station
-fn discover_stations<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize), Error> {
+fn discover_stations<'a>(
+    lines: &Vec<&str>,
+    ns: &Namespace,
+) -> Result<(Vec<Station>, usize), Error> {
     // regex for matching stations
     let station_re =
         //Regex::new(r"(\[[a-zA-Z0-9- ]*(?::[!NSEW]*)?\])|(\{[a-zA-Z0-9- ]*(?::[!NSEW]*)?\})")(\[.*(?::[!NSEW]*)?\])|(\{.*(?::[!NSEW]*)?\})
@@ -88,13 +92,19 @@ fn discover_stations<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize),
             if text.starts_with('{') {
                 // assignment station
                 debug!(3, " - #{} @ {} {}", stations.len(), loc, text);
-                stations.push(Station::new(stripped, loc, StationModifiers::default()));
+                stations.push(Station::new(
+                    stripped,
+                    loc,
+                    StationModifiers::default(),
+                    ns,
+                )?);
                 continue;
             }
             let split: Vec<&str> = stripped.split(':').collect();
             if split.len() > 2 {
                 return Err(Error {
-                    t: ErrorType::SyntaxError(loc),
+                    t: ErrorType::SyntaxError,
+                    loc,
                     msg: String::from(
                         "Invalid station, modifiers must be of the form \"[<NAME>:<FLAGS>]\"",
                     ),
@@ -104,7 +114,8 @@ fn discover_stations<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize),
             if identifier == "start" {
                 if start_found {
                     return Err(Error {
-                        t: ErrorType::SyntaxError(loc),
+                        t: ErrorType::SyntaxError,
+                        loc,
                         msg: String::from("Factory must only define one start station"),
                     });
                 }
@@ -113,7 +124,7 @@ fn discover_stations<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize),
             }
             for c in identifier.chars() {
                 if identifier != "" && !c.is_ascii_alphanumeric() && c != '-' && c != ' ' {
-                    return Err(Error { t: ErrorType::SyntaxError(loc), msg: String::from("Station identifiers must only contain a-z, A-Z, 0-9, dashes, and spaces.") });
+                    return Err(Error { t: ErrorType::SyntaxError, loc, msg: String::from("Station identifiers must only contain a-z, A-Z, 0-9, dashes, and spaces.") });
                 }
             }
 
@@ -130,7 +141,8 @@ fn discover_stations<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize),
                 let mut check_multiple_directions = || -> Result<(), Error> {
                     if direction_specified {
                         return Err(Error {
-                            t: ErrorType::SyntaxError(loc),
+                            t: ErrorType::SyntaxError,
+                            loc,
                             msg: String::from(
                                 "Each station must contain only one direction priority modifier",
                             ),
@@ -162,16 +174,17 @@ fn discover_stations<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize),
             }
 
             debug!(3, " - #{} @ {} {}", stations.len(), loc, text);
-            stations.push(Station::new(identifier, loc, modifiers));
+            stations.push(Station::new(identifier, loc, modifiers, ns)?);
         }
     }
     if !start_found {
         return Err(Error {
-            t: ErrorType::SyntaxError(SourceLocation {
+            t: ErrorType::SyntaxError,
+            loc: SourceLocation {
                 line: 0,
                 col: 0,
                 len: 0,
-            }),
+            },
             msg: String::from("Unable to locate start station"),
         });
     }
@@ -183,10 +196,10 @@ fn discover_stations<'a>(lines: &Vec<&str>) -> Result<(Vec<Station<'a>>, usize),
 ///
 /// I need this cus the regex searching above only returns a byte offset but I need
 /// the station's positions in terms of complete characters
+#[inline]
 fn get_char_index_from_byte_offset(byte_offset: usize, s: &str) -> usize {
-    let s = String::from(s);
     let mut char_index = 0;
-    for (pos, _) in s.char_indices() {
+    for (pos, _) in String::from(s).char_indices() {
         if byte_offset <= pos {
             return char_index;
         }

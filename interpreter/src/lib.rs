@@ -5,15 +5,23 @@ pub mod macros;
 pub mod preprocessor;
 pub mod runtime;
 pub mod station;
+pub mod stdlib;
 
-use pallet::*;
+use fs_core::StationType;
 use station::*;
 
+pub type Namespace = Vec<&'static StationType<'static>>;
+
 pub fn run<'a>(src: String) -> Result<(), Error> {
-    let lines: Vec<&str> = src.split('\n').collect();
+    debug!(2, "Initializing stdlib...");
+    let mut namespace: Namespace = Vec::new();
+    for name in (*stdlib::NAMESPACE).iter() {
+        namespace.push(name);
+    }
 
     debug!(2, "Preprocessing...");
-    let (mut stations, start_i) = preprocessor::process(&lines)?;
+    let lines: Vec<&str> = src.split('\n').collect();
+    let (mut stations, start_i) = preprocessor::process(&lines, &namespace)?;
 
     debug!(1, "Starting...");
     runtime::execute(&mut stations, start_i)?;
@@ -26,6 +34,8 @@ pub struct Error {
     ///
     /// named `t` cus `"type"` is a reserved keyword :_(
     pub t: ErrorType,
+    /// Location the error originated from
+    pub loc: SourceLocation,
     /// Message
     pub msg: String,
 }
@@ -37,15 +47,15 @@ impl std::fmt::Display for Error {
 
 /// Types of handled errors
 pub enum ErrorType {
-    SyntaxError(SourceLocation),
+    SyntaxError,
+    IdentifierError,
     RuntimeError,
 }
 impl std::fmt::Display for ErrorType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            Self::SyntaxError(loc) => {
-                format!("Syntax Error (@ {})", loc)
-            }
+            Self::SyntaxError => String::from("Syntax Error"),
+            Self::IdentifierError => String::from("Identifier Error"),
             Self::RuntimeError => String::from("Runtime Error"),
         };
         write!(f, "{s}")

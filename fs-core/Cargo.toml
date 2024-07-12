@@ -1,8 +1,10 @@
 [package]
 name = "fs-core"
+description = "FactoryScript core library, contains common types, macros, and definitions"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
 readme.workspace = true
+repository.workspace = true
 
 [dependencies]

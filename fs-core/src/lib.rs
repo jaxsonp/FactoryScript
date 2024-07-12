@@ -22,5 +22,53 @@ pub const SOUTH_BELTS: &str = "│┌┐║╔╗";
 /// All west-connecting belt characters
 pub const WEST_BELTS: &str = "─┐┘═╗╝";
 
-/// Trait to define a station and all the required functionality and information
-pub trait StationType {}
+/// Defines a station and all the required information and functionality
+pub struct StationType<'a> {
+    pub id: &'a str,
+    /// How many inputs does this station require to trigger its procedure
+    pub inputs: usize,
+    /// Does this station produce output
+    pub output: bool,
+    /// Station's procedure, takes a vector of input pallets and returns an optional
+    /// pallet if successful, and an error message in a String if not
+    pub procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String>,
+}
+
+/// Instance of a pallet
+#[derive(Debug, Clone, PartialEq)]
+pub enum Pallet {
+    Empty,
+    Bool(bool),
+    Char(char),
+    String(String),
+    Int(i32),
+    Float(f32),
+}
+
+/// Macro to define a station in a library.
+#[macro_export]
+macro_rules! define_station {
+    (
+        $name:ident {
+            id: $id:literal,
+            inputs: $inputs:expr,
+            output: $output:expr,
+            procedure: (pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> $procedure:block
+        }
+    ) => {
+        paste! {
+            #[allow(unused_variables)]
+            #[allow(dead_code)]
+            fn [<$name:snake _procedure>] (pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
+                $procedure
+            }
+            #[allow(non_upper_case_globals)]
+            static [<$name>]: StationType = StationType {
+                id: $id,
+                inputs: $inputs,
+                output: $output,
+                procedure: [<$name:snake _procedure>],
+            };
+        }
+    };
+}

@@ -1,13 +1,12 @@
 use crate::*;
 use fs_core::*;
-use stdlib;
 
 /// Instance of a station
-pub struct Station<'a> {
+pub struct Station {
     /// Location of the station in source code
     pub loc: SourceLocation,
     /// Station functionality and type information
-    pub logic: &'a dyn StationType,
+    pub station_type: &'static StationType<'static>,
     /// Modifiers duh
     pub modifiers: StationModifiers,
     /// Queues for each input bay
@@ -15,26 +14,50 @@ pub struct Station<'a> {
     /// Map of each output bay connection in the form (station_index, in_bay_index)
     pub out_bays: Vec<(usize, usize)>,
 }
-impl Station<'_> {
-    pub fn new(identifier: &str, loc: SourceLocation, modifiers: StationModifiers) -> Self {
-        Self {
+impl Station {
+    pub fn new(
+        identifier: &str,
+        loc: SourceLocation,
+        modifiers: StationModifiers,
+        ns: &Namespace,
+    ) -> Result<Self, Error> {
+        for name in ns {
+            if identifier == name.id {
+                return Ok(Self {
+                    loc,
+                    station_type: name,
+                    modifiers,
+                    in_bays: Vec::new(),
+                    out_bays: Vec::new(),
+                });
+            }
+        }
+        return Err(Error {
+            t: ErrorType::IdentifierError,
             loc,
-            logic: &stdlib::Start,
+            msg: format!("Failed to find station type with identifier \"{identifier}\""),
+        });
+    }
+    /*pub fn new_assign(
+        value: &str,
+        loc: SourceLocation,
+        modifiers: StationModifiers,
+    ) -> Result<Self, Error> {
+        let station_type = stdlib::get_assign_station(value);
+        Ok(Self {
+            loc,
+            station_type,
             modifiers,
             in_bays: Vec::new(),
             out_bays: Vec::new(),
-        }
-    }
+        })
+    }*/
     pub fn new_in_bay(&mut self) {
         self.in_bays.push(None);
     }
 }
-/*impl std::fmt::Display for Station<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} @ {}", self.t, self.loc)
-    }
-}*/
 
+/// Struct for holding the modifiers of an instance of a station
 pub struct StationModifiers {
     /// Reverse input precedence (false=cw, true=ccw)
     pub reverse: bool,

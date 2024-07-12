@@ -88,11 +88,12 @@ pub fn probe(
         } else {
             // dangling belt
             return Err(Error {
-                t: ErrorType::SyntaxError(SourceLocation {
+                t: ErrorType::SyntaxError,
+                loc: SourceLocation {
                     line: pos.0,
                     col: pos.1,
                     len: 1,
-                }),
+                },
                 msg: String::from("Dangling belt"),
             });
         }
@@ -139,11 +140,12 @@ pub fn probe(
 
     // dangling belt out of bounds
     return Err(Error {
-        t: ErrorType::SyntaxError(SourceLocation {
+        t: ErrorType::SyntaxError,
+        loc: SourceLocation {
             line: pos.0,
             col: pos.1,
             len: 1,
-        }),
+        },
         msg: String::from("Dangling belt, out of bounds"),
     });
 }

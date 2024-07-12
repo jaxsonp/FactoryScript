@@ -1,14 +1,20 @@
 [package]
 name = "interpreter"
+description = "The official FactoryScript interpreter"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
 readme.workspace = true
+repository.workspace = true
 default-run = "interpreter"
 
 [dependencies]
 fs-core = { path = "../fs-core" }
-stdlib = { path = "../stdlib" }
 clap = { version = "4.5.9", features = ["derive"] }
 inline_colorization = "0.1.6"
 regex = "1.10.5"
+lazy_static = "1.5.0"
+paste = "1.0.15"
+
+[[bin]]
+name = "interpreter"
