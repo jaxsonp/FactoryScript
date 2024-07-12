@@ -32,7 +32,7 @@ pub struct StationType<'a> {
     pub output: bool,
     /// Station's procedure, takes a vector of input pallets and returns an optional
     /// pallet if successful, and an error message in a String if not
-    pub procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String>,
+    pub procedure: fn(pallets: &Vec<Pallet>) -> Result<Option<Pallet>, String>,
 }
 
 /// Instance of a pallet
@@ -46,6 +46,10 @@ pub enum Pallet {
     Float(f32),
 }
 
+/* BROKEN
+want to fix but I can't figure out the procedure definition macro stuff
+because of macro hygeine
+
 /// Macro to define a station in a library.
 #[macro_export]
 macro_rules! define_station {
@@ -54,15 +58,12 @@ macro_rules! define_station {
             id: $id:literal,
             inputs: $inputs:expr,
             output: $output:expr,
-            procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> $procedure:block
+            procedure: $procedure:item
         }
     ) => {
         paste! {
-            #[allow(unused_variables)]
-            #[allow(dead_code)]
-            fn [<$name:snake _procedure>] (pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
-                $procedure
-            }
+
+            $procedure
             #[allow(non_upper_case_globals)]
             static [<$name>]: StationType = StationType {
                 id: $id,
@@ -73,3 +74,4 @@ macro_rules! define_station {
         }
     };
 }
+*/

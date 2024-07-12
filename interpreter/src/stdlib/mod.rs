@@ -1,50 +1,95 @@
 use core::*;
 use lazy_static::lazy_static;
-use paste::paste;
 
 #[cfg(test)]
 mod tests;
 
 lazy_static! {
-    pub static ref NAMESPACE: Vec<&'static StationType<'static>> =
-        vec![&Start, &Exit, &Joint, &Assign];
+    pub static ref NAMES: Vec<&'static StationType<'static>> =
+        vec![&START, &EXIT, &JOINT, &ASSIGN, &PRINT, &PRINTLN];
 }
 
-define_station!(Start {
+/// Common procedure that returns nothign
+fn none_procedure(_: &Vec<Pallet>) -> Result<Option<Pallet>, String> {
+    return Ok(None);
+}
+
+static START: StationType = StationType {
     id: "start",
     inputs: 0,
     output: true,
-    procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
-        return Ok(Some(Pallet::Empty));
-    }
-});
+    procedure: start_procedure,
+};
+fn start_procedure(_: &Vec<Pallet>) -> Result<Option<Pallet>, String> {
+    return Ok(Some(Pallet::Empty));
+}
 
-define_station!(Exit {
+static EXIT: StationType = StationType {
     id: "exit",
     inputs: 1,
     output: false,
-    procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
-        return Ok(None);
-    }
-});
+    procedure: none_procedure,
+};
 
-define_station!(Joint {
+static JOINT: StationType = StationType {
     id: "",
     inputs: 1,
     output: true,
-    procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
-        return Ok(None);
-    }
-});
+    procedure: none_procedure,
+};
 
-define_station!(Assign {
+static ASSIGN: StationType = StationType {
     id: "assign",
     inputs: 1,
     output: true,
-    procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
-        return Ok(None);
+    procedure: none_procedure,
+};
+
+static PRINT: StationType = StationType {
+    id: "print",
+    inputs: 1,
+    output: false,
+    procedure: print_procedure,
+};
+fn print_procedure(pallets: &Vec<Pallet>) -> Result<Option<Pallet>, String> {
+    match pallets.iter().next().unwrap() {
+        Pallet::Empty => {
+            println!();
+        }
+        Pallet::Bool(b) => {
+            if *b {
+                println!("true");
+            } else {
+                println!("false");
+            }
+        }
+        Pallet::Char(c) => {
+            println!("{c}");
+        }
+        Pallet::String(s) => {
+            println!("{s}");
+        }
+        Pallet::Int(i) => {
+            println!("{i}");
+        }
+        Pallet::Float(f) => {
+            println!("{f:.8}");
+        }
     }
-});
+    return Ok(None);
+}
+
+static PRINTLN: StationType = StationType {
+    id: "println",
+    inputs: 1,
+    output: false,
+    procedure: println_procedure,
+};
+fn println_procedure(pallets: &Vec<Pallet>) -> Result<Option<Pallet>, String> {
+    print_procedure(pallets)?;
+    println!();
+    return Ok(None);
+}
 
 /*
 /// Search stdlib stations by id string
