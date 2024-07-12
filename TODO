@@ -1,7 +1,8 @@
+- tests
 - assign station typing
 - preprocessing inputs (checking theres the correct number of inputs)
-- runtime
 - finish standard library stuff
+- timing steps for debug
 - Crossing conveyor belts
 - functions
 - modules

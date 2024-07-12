@@ -37,6 +37,7 @@ pub fn execute(
         // executing station procedures
         for i in 0..stations.len() {
             let station = &mut stations[i];
+            // counting occupied bays
             let mut occupied_bays = 0;
             for bay in station.in_bays.iter() {
                 if bay.is_some() {
@@ -44,6 +45,7 @@ pub fn execute(
                 }
             }
             if occupied_bays >= station.logic.inputs && station.logic.inputs > 0 {
+                // running procedures
                 debug!(3, " - Procedure triggered on #{i} ({})", station.logic.id);
                 // handling special case stations
                 if station.logic.id == "assign" {
@@ -57,12 +59,13 @@ pub fn execute(
                             msg: format!("Can't find assign table entry for #{i}"),
                         });
                     };
+                    debug!(4, "    - Produced: {}", new_pallet);
                     moving_pallets.push((new_pallet.clone(), station.out_bays[0]));
                     station.in_bays[0] = None;
                     continue;
                 }
 
-                // executing procedure
+                // executing general procedures
                 let procedure = station.logic.procedure;
                 match procedure(&station.in_bays) {
                     Ok(Some(p)) => {
@@ -73,6 +76,7 @@ pub fn execute(
                                 msg: String::from("Station procedure returned pallet unexpectedly"),
                             });
                         }
+                        debug!(4, "    - produced: {}", p);
                         moving_pallets.push((p, station.out_bays[0]));
                     }
                     Ok(None) => {
@@ -85,6 +89,7 @@ pub fn execute(
                                 ),
                             });
                         }
+                        debug!(4, "    - produced: None",);
                     }
                     Err(msg) => {
                         return Err(Error {
@@ -93,6 +98,11 @@ pub fn execute(
                             msg,
                         });
                     }
+                }
+
+                // clearing input bays
+                for bay in station.in_bays.iter_mut() {
+                    *bay = None;
                 }
             }
         }

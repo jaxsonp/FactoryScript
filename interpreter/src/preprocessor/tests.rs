@@ -43,7 +43,7 @@ fn test_discover_stations_none() {
 
 #[test]
 fn test_discover_stations_assign() {
-    let lines: Vec<&str> = vec!["[start] {hello world}"];
+    let lines: Vec<&str> = vec!["[start] {\"hello world\"}"];
     let (_, _, assign_table) = dbg!(discover_stations(&lines, &stdlib::NAMES))
         .ok()
         .unwrap();
@@ -55,6 +55,15 @@ fn test_discover_stations_two_starts() {
     let lines: Vec<&str> = vec!["[start] [start]"];
     let stations = discover_stations(&lines, &stdlib::NAMES);
     assert!(stations.is_err());
+}
+
+#[test]
+fn test_is_int() {
+    assert_eq!(is_int("1234"), true);
+    assert_eq!(is_int("1_000_000"), true);
+    assert_eq!(is_int("0"), true);
+    assert_eq!(is_int("12.34"), false);
+    assert_eq!(is_int("1234f"), false);
 }
 
 #[test]

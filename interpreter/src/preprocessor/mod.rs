@@ -99,7 +99,44 @@ fn discover_stations(
             if text.starts_with('{') {
                 // assignment station
                 debug!(3, " - #{} @ {} {}", stations.len(), loc, text);
-                assign_table.insert(stations.len(), Pallet::String(String::from(stripped)));
+                // parsing type
+                let value = if stripped == "true" {
+                    Pallet::Bool(true)
+                } else if stripped == "false" {
+                    Pallet::Bool(false)
+                } else if stripped.starts_with('\"') && stripped.ends_with('\"') {
+                    Pallet::String(String::from(&stripped[1..stripped.len() - 1]))
+                } else if stripped.starts_with('\'') && stripped.ends_with('\'') {
+                    let chars: Vec<char> = stripped.chars().collect();
+                    if chars.len() != 3 {
+                        return Err(Error {
+                            t: ErrorType::SyntaxError,
+                            loc,
+                            msg: String::from("Invalid character literal"),
+                        });
+                    }
+                    Pallet::Char(chars[1])
+                } else if is_int(stripped) {
+                    let s = stripped.replace('_', "");
+                    let num = match s.parse::<i32>() {
+                        Ok(num) => num,
+                        Err(e) => {
+                            return Err(Error {
+                                t: ErrorType::SyntaxError,
+                                loc,
+                                msg: format!("Failed to parse integer: {e}"),
+                            });
+                        }
+                    };
+                    Pallet::Int(num)
+                } else {
+                    return Err(Error {
+                        t: ErrorType::SyntaxError,
+                        loc,
+                        msg: format!("Unable to infer assignment type of \"{text}\""),
+                    });
+                };
+                assign_table.insert(stations.len(), value);
                 stations.push(Station::new(
                     "assign",
                     loc,
@@ -197,6 +234,16 @@ fn discover_stations(
         });
     }
     return Ok((stations, start_index, assign_table));
+}
+
+/// helper function to check if a string can be parsed into an integer
+fn is_int(s: &str) -> bool {
+    for c in s.chars() {
+        if !(c.is_ascii_digit() || c == '_') {
+            return false;
+        }
+    }
+    return true;
 }
 
 /// helper function to get the index of a unicode character from the byte offset
