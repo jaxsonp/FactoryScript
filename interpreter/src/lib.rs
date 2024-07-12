@@ -21,14 +21,15 @@ pub fn run<'a>(src: String) -> Result<(), Error> {
 
     debug!(2, "Preprocessing...");
     let lines: Vec<&str> = src.split('\n').collect();
-    let (mut stations, start_i) = preprocessor::process(&lines, &namespace)?;
+    let (mut stations, start_i, assign_table) = preprocessor::process(&lines, &namespace)?;
 
     debug!(1, "Starting...");
-    runtime::execute(&mut stations, start_i)?;
+    runtime::execute(&mut stations, start_i, &assign_table)?;
     Ok(())
 }
 
 /// Custom error handling struct
+#[derive(Debug)]
 pub struct Error {
     /// Error type
     ///
@@ -46,6 +47,7 @@ impl std::fmt::Display for Error {
 }
 
 /// Types of handled errors
+#[derive(Debug)]
 pub enum ErrorType {
     SyntaxError,
     IdentifierError,

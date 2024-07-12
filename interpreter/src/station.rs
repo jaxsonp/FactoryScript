@@ -2,6 +2,7 @@ use crate::*;
 use core::*;
 
 /// Instance of a station
+#[derive(Debug)]
 pub struct Station {
     /// Location of the station in source code
     pub loc: SourceLocation,
@@ -38,26 +39,13 @@ impl Station {
             msg: format!("Failed to find station type with identifier \"{identifier}\""),
         });
     }
-    /*pub fn new_assign(
-        value: &str,
-        loc: SourceLocation,
-        modifiers: StationModifiers,
-    ) -> Result<Self, Error> {
-        let station_type = stdlib::get_assign_station(value);
-        Ok(Self {
-            loc,
-            station_type,
-            modifiers,
-            in_bays: Vec::new(),
-            out_bays: Vec::new(),
-        })
-    }*/
     pub fn new_in_bay(&mut self) {
         self.in_bays.push(None);
     }
 }
 
 /// Struct for holding the modifiers of an instance of a station
+#[derive(Debug)]
 pub struct StationModifiers {
     /// Reverse input precedence (false=cw, true=ccw)
     pub reverse: bool,

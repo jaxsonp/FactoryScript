@@ -23,11 +23,12 @@ pub const SOUTH_BELTS: &str = "│┌┐║╔╗";
 pub const WEST_BELTS: &str = "─┐┘═╗╝";
 
 /// Defines a station and all the required information and functionality
+#[derive(Debug)]
 pub struct StationType<'a> {
     pub id: &'a str,
-    /// How many inputs does this station require to trigger its procedure
+    /// Minimum number of inputs required for this station to trigger its procedure
     pub inputs: usize,
-    /// Does this station produce output
+    /// Does this station produce an output pallet
     pub output: bool,
     /// Station's procedure, takes a vector of input pallets and returns an optional
     /// pallet if successful, and an error message in a String if not
@@ -53,7 +54,7 @@ macro_rules! define_station {
             id: $id:literal,
             inputs: $inputs:expr,
             output: $output:expr,
-            procedure: (pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> $procedure:block
+            procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> $procedure:block
         }
     ) => {
         paste! {

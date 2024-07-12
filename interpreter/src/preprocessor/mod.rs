@@ -1,4 +1,6 @@
+use core::Pallet;
 use regex::Regex;
+use std::collections::HashMap;
 
 pub mod probe;
 #[cfg(test)]
@@ -10,10 +12,13 @@ use crate::*;
 ///
 /// Returns a tuple containing a vector of stations and the index of the start
 /// station, or an `Error` if unsuccessful
-pub fn process<'a>(lines: &Vec<&str>, ns: &Namespace) -> Result<(Vec<Station>, usize), Error> {
+pub fn process<'a>(
+    lines: &Vec<&str>,
+    ns: &Namespace,
+) -> Result<(Vec<Station>, usize, HashMap<usize, Pallet>), Error> {
     // discovery
     debug!(3, "Discovering stations");
-    let (mut stations, start_index) = discover_stations(lines, ns)?;
+    let (mut stations, start_index, assign_table) = discover_stations(lines, ns)?;
     debug!(3, "Found {} stations", stations.len());
 
     // generating 2d vector layout of source code
@@ -60,15 +65,16 @@ pub fn process<'a>(lines: &Vec<&str>, ns: &Namespace) -> Result<(Vec<Station>, u
     }
 
     debug!(2, "Finished preprocessing");
-    Ok((stations, start_index))
+    Ok((stations, start_index, assign_table))
 }
 
 /// Finds all stations in the source code, parses their type and modifiers, returns
-/// a vector of all stations and the index of the start station
+/// a vector of all stations, the start station's index, and the assign table
+/// (a hashmap containing the values of every assign station)
 fn discover_stations<'a>(
     lines: &Vec<&str>,
     ns: &Namespace,
-) -> Result<(Vec<Station>, usize), Error> {
+) -> Result<(Vec<Station>, usize, HashMap<usize, Pallet>), Error> {
     // regex for matching stations
     let station_re =
         //Regex::new(r"(\[[a-zA-Z0-9- ]*(?::[!NSEW]*)?\])|(\{[a-zA-Z0-9- ]*(?::[!NSEW]*)?\})")(\[.*(?::[!NSEW]*)?\])|(\{.*(?::[!NSEW]*)?\})
@@ -76,6 +82,7 @@ fn discover_stations<'a>(
             .unwrap();
 
     let mut stations: Vec<Station> = Vec::new();
+    let mut assign_table: HashMap<usize, Pallet> = HashMap::new();
     let mut start_found = false;
     let mut start_index = 0;
     for i in 0..lines.len() {
@@ -91,9 +98,11 @@ fn discover_stations<'a>(
             let stripped = &text[1..text.len() - 1];
             if text.starts_with('{') {
                 // assignment station
+                println!("assign!");
                 debug!(3, " - #{} @ {} {}", stations.len(), loc, text);
+                assign_table.insert(stations.len(), Pallet::String(String::from(stripped)));
                 stations.push(Station::new(
-                    stripped,
+                    "assign",
                     loc,
                     StationModifiers::default(),
                     ns,
@@ -188,7 +197,7 @@ fn discover_stations<'a>(
             msg: String::from("Unable to locate start station"),
         });
     }
-    return Ok((stations, start_index));
+    return Ok((stations, start_index, assign_table));
 }
 
 /// helper function to get the index of a unicode character from the byte offset

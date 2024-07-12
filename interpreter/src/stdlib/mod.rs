@@ -6,14 +6,15 @@ use paste::paste;
 mod tests;
 
 lazy_static! {
-    pub static ref NAMESPACE: Vec<&'static StationType<'static>> = vec![&Start, &Exit];
+    pub static ref NAMESPACE: Vec<&'static StationType<'static>> =
+        vec![&Start, &Exit, &Joint, &Assign];
 }
 
 define_station!(Start {
     id: "start",
     inputs: 0,
     output: true,
-    procedure: (pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
+    procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
         return Ok(Some(Pallet::Empty));
     }
 });
@@ -22,7 +23,25 @@ define_station!(Exit {
     id: "exit",
     inputs: 1,
     output: false,
-    procedure: (pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
+    procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
+        return Ok(None);
+    }
+});
+
+define_station!(Joint {
+    id: "",
+    inputs: 1,
+    output: true,
+    procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
+        return Ok(None);
+    }
+});
+
+define_station!(Assign {
+    id: "assign",
+    inputs: 1,
+    output: true,
+    procedure: fn(pallets: Vec<Pallet>) -> Result<Option<Pallet>, String> {
         return Ok(None);
     }
 });
