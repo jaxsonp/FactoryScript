@@ -1,9 +1,0 @@
-[package]
-name = "stdlib"
-version.workspace = true
-authors.workspace = true
-edition.workspace = true
-readme.workspace = true
-
-[dependencies]
-fs-core = {path = "../fs-core"}
