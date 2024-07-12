@@ -1,4 +1,4 @@
-use fs_core::*;
+use core::*;
 use lazy_static::lazy_static;
 use paste::paste;
 

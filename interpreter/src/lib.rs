@@ -7,7 +7,7 @@ pub mod runtime;
 pub mod station;
 pub mod stdlib;
 
-use fs_core::StationType;
+use core::StationType;
 use station::*;
 
 pub type Namespace = Vec<&'static StationType<'static>>;

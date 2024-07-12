@@ -1,5 +1,5 @@
 use crate::*;
-use fs_core::*;
+use core::*;
 
 /// Given a starting position around a station, check if it is an input bay and
 /// if it is find the origin of the conveyor belt

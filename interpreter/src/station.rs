@@ -1,5 +1,5 @@
 use crate::*;
-use fs_core::*;
+use core::*;
 
 /// Instance of a station
 pub struct Station {
