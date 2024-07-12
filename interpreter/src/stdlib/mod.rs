@@ -71,7 +71,7 @@ fn print_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, Stri
             print!("{i}");
         }
         Some(Pallet::Float(f)) => {
-            print!("{f:.8}");
+            print!("{f}");
         }
         None => return Err(String::from("Missing pallet in print")),
     }

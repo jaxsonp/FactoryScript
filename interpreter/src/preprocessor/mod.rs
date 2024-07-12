@@ -98,7 +98,6 @@ fn discover_stations(
             let stripped = &text[1..text.len() - 1];
             if text.starts_with('{') {
                 // assignment station
-                debug!(3, " - #{} @ {} {}", stations.len(), loc, text);
                 // parsing type
                 let value = if stripped == "true" {
                     Pallet::Bool(true)
@@ -116,7 +115,26 @@ fn discover_stations(
                         });
                     }
                     Pallet::Char(chars[1])
+                } else if stripped.ends_with('f') || is_float(stripped) {
+                    let s = if stripped.ends_with('f') {
+                        &stripped[..stripped.len() - 1]
+                    } else {
+                        stripped
+                    };
+                    let num = match s.parse::<f32>() {
+                        Ok(num) => num,
+                        Err(e) => {
+                            return Err(Error {
+                                t: ErrorType::SyntaxError,
+                                loc,
+                                msg: format!("Failed to parse float: {e}"),
+                            });
+                        }
+                    };
+                    println!("{num}");
+                    Pallet::Float(num)
                 } else if is_int(stripped) {
+                    println!("int");
                     let s = stripped.replace('_', "");
                     let num = match s.parse::<i32>() {
                         Ok(num) => num,
@@ -136,6 +154,14 @@ fn discover_stations(
                         msg: format!("Unable to infer assignment type of \"{text}\""),
                     });
                 };
+                debug!(
+                    3,
+                    " - #{} @ {} {} contains {}",
+                    stations.len(),
+                    loc,
+                    text,
+                    value
+                );
                 assign_table.insert(stations.len(), value);
                 stations.push(Station::new(
                     "assign",
@@ -237,9 +263,27 @@ fn discover_stations(
 }
 
 /// helper function to check if a string can be parsed into an integer
+#[inline]
 fn is_int(s: &str) -> bool {
     for c in s.chars() {
         if !(c.is_ascii_digit() || c == '_') {
+            return false;
+        }
+    }
+    return true;
+}
+
+/// helper function to check if a string can be parsed into a float
+#[inline]
+fn is_float(s: &str) -> bool {
+    let mut found_decimal = false;
+    for c in s.chars() {
+        if c == '.' {
+            if found_decimal {
+                return false;
+            }
+            found_decimal = true;
+        } else if !c.is_ascii_digit() && c != '_' {
             return false;
         }
     }
