@@ -152,14 +152,7 @@ fn discover_stations(
                         msg: format!("Unable to infer assignment type of \"{text}\""),
                     });
                 };
-                debug!(
-                    3,
-                    " - #{} @ {} {} contains {}",
-                    stations.len(),
-                    loc,
-                    text,
-                    value
-                );
+                debug!(3, " - #{} @ {} {} -> {}", stations.len(), loc, text, value);
                 assign_table.insert(stations.len(), value);
                 stations.push(Station::new(
                     "assign",
@@ -188,7 +181,7 @@ fn discover_stations(
                         msg: String::from("Factory must only define one start station"),
                     });
                 }
-                start_index = i;
+                start_index = stations.len();
                 start_found = true;
             }
             // making sure the name is valid

@@ -1,6 +1,8 @@
 - preprocessing inputs (checking theres the correct number of inputs)
-- finish standard library stuff
+- exit block logic
 - timing steps for debug
+- finish standard library stuff
 - Crossing conveyor belts
 - functions
+- integration tests maybe?
 - modules

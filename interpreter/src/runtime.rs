@@ -15,6 +15,7 @@ pub fn execute(
 
     // begin from start station
     let start_station = &stations[start_i];
+    debug!(3, "Start pallet spawned at #{start_i}");
     moving_pallets.push((Pallet::Empty, start_station.out_bays[0]));
     let mut t: usize = 0;
     while !moving_pallets.is_empty() {
@@ -43,9 +44,9 @@ pub fn execute(
             }
             if occupied_bays >= station.logic.inputs && station.logic.inputs > 0 {
                 // running procedures
-                debug!(3, " - Procedure triggered on #{i} ({})", station.logic.id);
+                debug!(3, " - Procedure triggered on #{i} ({:?})", station.logic.id);
                 // handling special case stations
-                if station.logic.id == "assign" {
+                if station.logic.has_id("assign") {
                     // special case: assign station
                     let new_pallet = if let Some(pallet) = assign_table.get(&i) {
                         pallet
@@ -58,7 +59,19 @@ pub fn execute(
                     };
                     debug!(4, "    - Produced: {}", new_pallet);
                     moving_pallets.push((new_pallet.clone(), station.out_bays[0]));
-                    station.in_bays[0] = None;
+                    station.clear_in_bays();
+                    continue;
+                } else if station.logic.has_id("joint") {
+                    // special case: joint station
+                    for in_bay in station.in_bays.iter() {
+                        if let Some(pallet) = in_bay {
+                            debug!(4, "    - Produced: {}", pallet);
+                            for out_bay in station.out_bays.iter() {
+                                moving_pallets.push((pallet.clone(), *out_bay));
+                            }
+                        }
+                    }
+                    station.clear_in_bays();
                     continue;
                 }
 
@@ -97,10 +110,7 @@ pub fn execute(
                     }
                 }
 
-                // clearing input bays
-                for bay in station.in_bays.iter_mut() {
-                    *bay = None;
-                }
+                station.clear_in_bays();
             }
         }
         debug!(3, "Step {t} completed ( ms)");

@@ -25,7 +25,10 @@ pub const WEST_BELTS: &str = "─┐┘═╗╝";
 /// Defines a station and all the required information and functionality
 #[derive(Debug)]
 pub struct StationType<'a> {
+    /// Identifier
     pub id: &'a str,
+    /// Alternate identifier
+    pub alt_id: Option<&'a str>,
     /// Minimum number of inputs required for this station to trigger its procedure
     pub inputs: usize,
     /// Does this station produce an output pallet
@@ -33,6 +36,12 @@ pub struct StationType<'a> {
     /// Station's procedure, takes a vector of input pallets and returns an optional
     /// pallet if successful, and an error message in a String if not
     pub procedure: fn(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String>,
+}
+impl StationType<'_> {
+    /// Function to check whether a station has a certain ID
+    pub fn has_id(&self, query: &str) -> bool {
+        return self.id == query || (self.alt_id.is_some_and(|alt_id| alt_id == query));
+    }
 }
 
 /// Instance of a pallet

@@ -22,11 +22,11 @@ impl Station {
         modifiers: StationModifiers,
         ns: &Namespace,
     ) -> Result<Self, Error> {
-        for name in ns {
-            if identifier == name.id {
+        for station_type in ns {
+            if station_type.has_id(identifier) {
                 return Ok(Self {
                     loc,
-                    logic: name,
+                    logic: station_type,
                     modifiers,
                     in_bays: Vec::new(),
                     out_bays: Vec::new(),
@@ -39,8 +39,17 @@ impl Station {
             msg: format!("Failed to find station type with identifier \"{identifier}\""),
         });
     }
+
     pub fn new_in_bay(&mut self) {
         self.in_bays.push(None);
+    }
+
+    pub fn clear_in_bays(&mut self) {
+        for bay in self.in_bays.iter_mut() {
+            if bay.is_some() {
+                *bay = None;
+            }
+        }
     }
 }
 
