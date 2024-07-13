@@ -67,6 +67,16 @@ fn test_is_int() {
 }
 
 #[test]
+fn test_is_float() {
+    assert_eq!(is_float("1234"), true);
+    assert_eq!(is_float("12.34"), true);
+    assert_eq!(is_float("1_000_000.1"), true);
+    assert_eq!(is_float("0"), true);
+    assert_eq!(is_float("12a34"), false);
+    assert_eq!(is_float("12.3.4"), false);
+}
+
+#[test]
 fn test_get_char_index_from_byte_offset() {
     let s = "😼abcd";
     assert_eq!(get_char_index_from_byte_offset(4, s), 1);

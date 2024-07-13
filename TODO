@@ -1,5 +1,3 @@
-- tests
-- assign station typing
 - preprocessing inputs (checking theres the correct number of inputs)
 - finish standard library stuff
 - timing steps for debug

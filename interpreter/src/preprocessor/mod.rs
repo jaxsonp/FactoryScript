@@ -318,11 +318,9 @@ pub fn is_float(s: &str) -> bool {
 /// # Example
 /// ```
 /// use interpreter::preprocessor::get_char_index_from_byte_offset;
-/// assert_eq!(is_float("12.34"), true);
-/// assert_eq!(is_float("1234"), true);
-/// assert_eq!(is_float("1_234_456"), true);
-/// assert_eq!(is_float("12a4"), false);
-/// assert_eq!(is_float("12.3.4"), false);
+/// let s = "😼abcd";
+/// assert_eq!(get_char_index_from_byte_offset(4, s), 1);
+/// assert_eq!(get_char_index_from_byte_offset(6, s), 3);
 /// ```
 #[inline]
 pub fn get_char_index_from_byte_offset(byte_offset: usize, s: &str) -> usize {
