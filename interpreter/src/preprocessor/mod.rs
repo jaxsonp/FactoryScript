@@ -263,8 +263,17 @@ fn discover_stations(
 }
 
 /// helper function to check if a string can be parsed into an integer
+///
+/// # Example
+/// ```
+/// use interpreter::preprocessor::is_int;
+/// assert_eq!(is_int("1234"), true);
+/// assert_eq!(is_int("1_234_456"), true);
+/// assert_eq!(is_int("12.34"), false);
+/// assert_eq!(is_int("12a4"), false);
+/// ```
 #[inline]
-fn is_int(s: &str) -> bool {
+pub fn is_int(s: &str) -> bool {
     for c in s.chars() {
         if !(c.is_ascii_digit() || c == '_') {
             return false;
@@ -274,8 +283,18 @@ fn is_int(s: &str) -> bool {
 }
 
 /// helper function to check if a string can be parsed into a float
+///
+/// # Example
+/// ```
+/// use interpreter::preprocessor::is_float;
+/// assert_eq!(is_float("12.34"), true);
+/// assert_eq!(is_float("1234"), true);
+/// assert_eq!(is_float("1_234_456"), true);
+/// assert_eq!(is_float("12a4"), false);
+/// assert_eq!(is_float("12.3.4"), false);
+/// ```
 #[inline]
-fn is_float(s: &str) -> bool {
+pub fn is_float(s: &str) -> bool {
     let mut found_decimal = false;
     for c in s.chars() {
         if c == '.' {
@@ -295,8 +314,18 @@ fn is_float(s: &str) -> bool {
 ///
 /// I need this cus the regex searching above only returns a byte offset but I need
 /// the station's positions in terms of complete characters
+///
+/// # Example
+/// ```
+/// use interpreter::preprocessor::get_char_index_from_byte_offset;
+/// assert_eq!(is_float("12.34"), true);
+/// assert_eq!(is_float("1234"), true);
+/// assert_eq!(is_float("1_234_456"), true);
+/// assert_eq!(is_float("12a4"), false);
+/// assert_eq!(is_float("12.3.4"), false);
+/// ```
 #[inline]
-fn get_char_index_from_byte_offset(byte_offset: usize, s: &str) -> usize {
+pub fn get_char_index_from_byte_offset(byte_offset: usize, s: &str) -> usize {
     let mut char_index = 0;
     for (pos, _) in String::from(s).char_indices() {
         if byte_offset <= pos {
