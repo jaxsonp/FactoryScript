@@ -115,6 +115,19 @@ fn discover_stations(
                         });
                     }
                     Pallet::Char(chars[1])
+                } else if is_int(stripped) {
+                    let s = stripped.replace('_', "");
+                    let num = match s.parse::<i32>() {
+                        Ok(num) => num,
+                        Err(e) => {
+                            return Err(Error {
+                                t: ErrorType::SyntaxError,
+                                loc,
+                                msg: format!("Failed to parse integer: {e}"),
+                            });
+                        }
+                    };
+                    Pallet::Int(num)
                 } else if stripped.ends_with('f') || is_float(stripped) {
                     let s = if stripped.ends_with('f') {
                         &stripped[..stripped.len() - 1]
@@ -131,22 +144,7 @@ fn discover_stations(
                             });
                         }
                     };
-                    println!("{num}");
                     Pallet::Float(num)
-                } else if is_int(stripped) {
-                    println!("int");
-                    let s = stripped.replace('_', "");
-                    let num = match s.parse::<i32>() {
-                        Ok(num) => num,
-                        Err(e) => {
-                            return Err(Error {
-                                t: ErrorType::SyntaxError,
-                                loc,
-                                msg: format!("Failed to parse integer: {e}"),
-                            });
-                        }
-                    };
-                    Pallet::Int(num)
                 } else {
                     return Err(Error {
                         t: ErrorType::SyntaxError,
@@ -193,9 +191,16 @@ fn discover_stations(
                 start_index = i;
                 start_found = true;
             }
+            // making sure the name is valid
             for c in identifier.chars() {
-                if identifier != "" && !c.is_ascii_alphanumeric() && c != '-' && c != ' ' {
-                    return Err(Error { t: ErrorType::SyntaxError, loc, msg: String::from("Station identifiers must only contain a-z, A-Z, 0-9, dashes, and spaces.") });
+                if identifier != "" && !c.is_ascii_graphic() {
+                    return Err(Error {
+                        t: ErrorType::SyntaxError,
+                        loc,
+                        msg: String::from(
+                            "Station identifiers must only contain printable ascii characters",
+                        ),
+                    });
                 }
             }
 
