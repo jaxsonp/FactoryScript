@@ -260,11 +260,7 @@ pub fn discover_stations(
     if !start_found {
         return Err(Error {
             t: ErrorType::SyntaxError,
-            loc: SourceLocation {
-                line: 0,
-                col: 0,
-                len: 0,
-            },
+            loc: SourceLocation::none(),
             msg: String::from("Unable to locate start station"),
         });
     }

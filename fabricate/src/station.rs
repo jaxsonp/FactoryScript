@@ -89,7 +89,7 @@ mod test {
     fn test_station_clear_in_bays() {
         let mut station = Station::new(
             "joint",
-            SourceLocation::at_start(),
+            SourceLocation::none(),
             StationModifiers::default(),
             &stdlib::MANIFEST,
         )

@@ -1,6 +1,8 @@
 pub static mut COLOR_OUTPUT: bool = false;
 pub static mut DEBUG_LEVEL: u8 = 0;
 
+use std::cmp::min;
+
 pub mod macros;
 pub mod preprocessor;
 pub mod runtime;
@@ -12,7 +14,7 @@ use station::*;
 
 pub type Namespace = Vec<&'static StationType<'static>>;
 
-pub fn run<'a>(src: String) -> Result<(), Error> {
+pub fn run<'a>(src: &String) -> Result<(), Error> {
     debug!(2, "Initializing namespace...");
     let mut namespace: Namespace = Vec::new();
     for name in (*stdlib::MANIFEST).iter() {
@@ -40,9 +42,67 @@ pub struct Error {
     /// Message
     pub msg: String,
 }
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}: {}", self.t, self.msg)
+impl Error {
+    /// function for generating a pretty error message
+    pub fn pretty_msg(&self, src: &String) -> String {
+        // fancy error formatting
+        if self.loc == SourceLocation::none() {
+            // location in code is N/A
+            return format!("{}: {}", self.t, self.msg);
+        }
+        // generating 2d vector layout of source code
+        let mut map: Vec<Vec<char>> = Vec::new();
+        for line in src.split('\n').collect::<Vec<&str>>() {
+            map.push(line.chars().collect());
+        }
+        let mut output = format!("{} @ {}", self.t, self.loc);
+        let left_bound = self.loc.col.saturating_sub(24);
+        let right_bound = min(80, self.loc.col + self.loc.len + 24);
+
+        // closure to try and get a line of source code to print given an offset
+        let try_get_ln = |offset: i32| -> String {
+            let line = (self.loc.line as i32) + offset;
+            if line < 0 || line as usize >= map.len() {
+                return String::new();
+            }
+            let line = line as usize;
+            let left_bound = min(left_bound, map[line].len().saturating_sub(1));
+            let right_bound = min(right_bound, map[line].len());
+            let mut output = format!("\n \x1b[22m{:>4} | \x1b[2m", line + 1);
+            for c in map[line][left_bound..right_bound].iter() {
+                output.push(*c);
+            }
+            return output;
+        };
+
+        // printing lines above
+        output += try_get_ln(-2).as_str();
+        output += try_get_ln(-1).as_str();
+        // printing line of error
+        {
+            let left_bound = min(left_bound, map[self.loc.line].len().saturating_sub(1));
+            let right_bound = min(right_bound, map[self.loc.line].len());
+            output += format!("\n\x1b[22m-{:->4}-| \x1b[2m", self.loc.line).as_str();
+            for c in map[self.loc.line][left_bound..self.loc.col].iter() {
+                output.push(*c);
+            }
+            // bold and underline
+            output += "\x1b[4m\x1b[22m";
+            for c in map[self.loc.line][self.loc.col..(self.loc.col + self.loc.len)].iter() {
+                output.push(*c);
+            }
+            output += "\x1b[24m\x1b[2m";
+            for c in map[self.loc.line][(self.loc.col + self.loc.len)..right_bound].iter() {
+                output.push(*c);
+            }
+        }
+        // printing line below
+        output += try_get_ln(1).as_str();
+        output += try_get_ln(2).as_str();
+
+        output += "\x1b[22m\n";
+        output += self.msg.as_str();
+        return output;
     }
 }
 
@@ -76,17 +136,18 @@ pub struct SourceLocation {
     pub len: usize,
 }
 impl SourceLocation {
-    pub fn at_start() -> Self {
+    /// Value to represent if the source location is not applicable
+    pub fn none() -> Self {
         Self {
             line: 0,
             col: 0,
-            len: 1,
+            len: 0,
         }
     }
 }
 impl std::fmt::Display for SourceLocation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{} +{}", self.line, self.col, self.len)
+        write!(f, "{}:{}-{}", self.line + 1, self.col, self.col + self.len)
     }
 }
 

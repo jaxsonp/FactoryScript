@@ -46,10 +46,10 @@ fn main() -> ExitCode {
         "Contents --------------\n{}\n-----------------------", file_contents
     );
 
-    match run(file_contents) {
+    match run(&file_contents) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
-            print_err!("{}", e);
+            print_err!("{}", e.pretty_msg(&file_contents));
             ExitCode::FAILURE
         }
     }

@@ -1,4 +1,3 @@
-- error handling (print location, format in paragraph)
 - exit block logic
 - fix parsing to allow escaped chars
 - finish standard library stuff
