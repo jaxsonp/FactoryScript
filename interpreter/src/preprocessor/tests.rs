@@ -3,7 +3,9 @@ use super::*;
 #[test]
 fn test_discover_stations() {
     let lines: Vec<&str> = vec!["[start]"];
-    let (stations, start_i, _) = discover_stations(&lines, &stdlib::MANIFEST).ok().unwrap();
+    let (stations, start_i, _) = parse::discover_stations(&lines, &stdlib::MANIFEST)
+        .ok()
+        .unwrap();
     assert_eq!(start_i, 0);
     let station = &stations[0];
     assert_eq!(
@@ -19,7 +21,9 @@ fn test_discover_stations() {
 #[test]
 fn test_discover_stations_four() {
     let lines: Vec<&str> = vec!["[exit][exit]", "[start][exit]"];
-    let (stations, _, _) = discover_stations(&lines, &stdlib::MANIFEST).ok().unwrap();
+    let (stations, _, _) = parse::discover_stations(&lines, &stdlib::MANIFEST)
+        .ok()
+        .unwrap();
     assert_eq!(stations.len(), 4);
 }
 
@@ -30,21 +34,21 @@ fn test_discover_stations_five() {
         "                         [exit]                             ",
         "[exit]                                                [exit]",
     ];
-    let stations = discover_stations(&lines, &stdlib::MANIFEST);
+    let stations = parse::discover_stations(&lines, &stdlib::MANIFEST);
     assert_eq!(stations.ok().unwrap().0.len(), 5);
 }
 
 #[test]
 fn test_discover_stations_none() {
     let lines: Vec<&str> = vec![""];
-    let stations = discover_stations(&lines, &stdlib::MANIFEST);
+    let stations = parse::discover_stations(&lines, &stdlib::MANIFEST);
     assert!(stations.is_err());
 }
 
 #[test]
 fn test_discover_stations_assign() {
     let lines: Vec<&str> = vec!["[start] {\"hello world\"}"];
-    let (_, _, assign_table) = dbg!(discover_stations(&lines, &stdlib::MANIFEST))
+    let (_, _, assign_table) = parse::discover_stations(&lines, &stdlib::MANIFEST)
         .ok()
         .unwrap();
     assert!(matches!(assign_table.get(&1).unwrap(), Pallet::String(_)));
@@ -53,46 +57,46 @@ fn test_discover_stations_assign() {
 #[test]
 fn test_discover_stations_two_starts() {
     let lines: Vec<&str> = vec!["[start] [start]"];
-    let stations = discover_stations(&lines, &stdlib::MANIFEST);
+    let stations = parse::discover_stations(&lines, &stdlib::MANIFEST);
     assert!(stations.is_err());
 }
 
 #[test]
 fn test_is_int() {
-    assert_eq!(is_int("1234"), true);
-    assert_eq!(is_int("1_000_000"), true);
-    assert_eq!(is_int("0"), true);
-    assert_eq!(is_int("12.34"), false);
-    assert_eq!(is_int("1234f"), false);
+    assert_eq!(parse::is_int("1234"), true);
+    assert_eq!(parse::is_int("1_000_000"), true);
+    assert_eq!(parse::is_int("0"), true);
+    assert_eq!(parse::is_int("12.34"), false);
+    assert_eq!(parse::is_int("1234f"), false);
 }
 
 #[test]
 fn test_is_float() {
-    assert_eq!(is_float("1234"), true);
-    assert_eq!(is_float("12.34"), true);
-    assert_eq!(is_float("1_000_000.1"), true);
-    assert_eq!(is_float("0"), true);
-    assert_eq!(is_float("12a34"), false);
-    assert_eq!(is_float("12.3.4"), false);
+    assert_eq!(parse::is_float("1234"), true);
+    assert_eq!(parse::is_float("12.34"), true);
+    assert_eq!(parse::is_float("1_000_000.1"), true);
+    assert_eq!(parse::is_float("0"), true);
+    assert_eq!(parse::is_float("12a34"), false);
+    assert_eq!(parse::is_float("12.3.4"), false);
 }
 
 #[test]
 fn test_get_char_index_from_byte_offset() {
     let s = "😼abcd";
-    assert_eq!(get_char_index_from_byte_offset(4, s), 1);
-    assert_eq!(get_char_index_from_byte_offset(6, s), 3);
+    assert_eq!(parse::get_char_index_from_byte_offset(4, s), 1);
+    assert_eq!(parse::get_char_index_from_byte_offset(6, s), 3);
 }
 
 #[test]
 fn test_get_char_index_from_byte_offset_no_unicode() {
     let s = "abcd";
-    assert_eq!(get_char_index_from_byte_offset(2, s), 2);
+    assert_eq!(parse::get_char_index_from_byte_offset(2, s), 2);
 }
 
 #[test]
 fn test_get_char_index_from_byte_offset_multiple_unicode() {
     let s = "😻a😼b😾c";
-    assert_eq!(get_char_index_from_byte_offset(14, s), 5);
+    assert_eq!(parse::get_char_index_from_byte_offset(14, s), 5);
 }
 
 #[test]
@@ -114,7 +118,7 @@ fn test_get_neighbors() {
     )
     .unwrap();
     assert_eq!(
-        get_neighbors(&map, &station),
+        parse::get_neighbors(&map, &station),
         vec![
             (0, 1, Direction::NORTH),
             (0, 2, Direction::NORTH),
@@ -141,7 +145,7 @@ fn test_get_neighbors_on_border() {
     )
     .unwrap();
     assert_eq!(
-        get_neighbors(&map, &station),
+        parse::get_neighbors(&map, &station),
         vec![(0, 3, Direction::EAST), (0, 0, Direction::WEST),]
     );
     let map = vec![vec![' ', ' '], vec!['[', ']'], vec![' ', ' ']];
@@ -151,7 +155,7 @@ fn test_get_neighbors_on_border() {
         len: 2,
     };
     assert_eq!(
-        get_neighbors(&map, &station),
+        parse::get_neighbors(&map, &station),
         vec![
             (0, 0, Direction::NORTH),
             (0, 1, Direction::NORTH),
@@ -175,7 +179,7 @@ fn test_get_neighbors_none() {
         &stdlib::MANIFEST,
     )
     .unwrap();
-    assert_eq!(get_neighbors(&map, &station), vec![])
+    assert_eq!(parse::get_neighbors(&map, &station), vec![])
 }
 
 #[test]
@@ -197,7 +201,7 @@ fn test_get_neighbors_reversed() {
     )
     .unwrap();
     assert_eq!(
-        get_neighbors(&map, &station),
+        parse::get_neighbors(&map, &station),
         vec![
             (0, 2, Direction::NORTH),
             (0, 1, Direction::NORTH),
@@ -209,7 +213,7 @@ fn test_get_neighbors_reversed() {
     );
     station.modifiers = station.modifiers.with_priority(Direction::EAST);
     assert_eq!(
-        get_neighbors(&map, &station),
+        parse::get_neighbors(&map, &station),
         vec![
             (1, 3, Direction::EAST),
             (0, 2, Direction::NORTH),
@@ -221,7 +225,7 @@ fn test_get_neighbors_reversed() {
     );
     station.modifiers = station.modifiers.with_priority(Direction::SOUTH);
     assert_eq!(
-        get_neighbors(&map, &station),
+        parse::get_neighbors(&map, &station),
         vec![
             (2, 1, Direction::SOUTH),
             (2, 2, Direction::SOUTH),
@@ -233,7 +237,7 @@ fn test_get_neighbors_reversed() {
     );
     station.modifiers = station.modifiers.with_priority(Direction::WEST);
     assert_eq!(
-        get_neighbors(&map, &station),
+        parse::get_neighbors(&map, &station),
         vec![
             (1, 0, Direction::WEST),
             (2, 1, Direction::SOUTH),
@@ -264,7 +268,7 @@ fn test_get_neighbors_with_direction() {
     )
     .unwrap();
     assert_eq!(
-        get_neighbors(&map, &station),
+        parse::get_neighbors(&map, &station),
         vec![
             (1, 3, Direction::EAST),
             (2, 2, Direction::SOUTH),
@@ -276,7 +280,7 @@ fn test_get_neighbors_with_direction() {
     );
     station.modifiers = station.modifiers.with_priority(Direction::SOUTH);
     assert_eq!(
-        get_neighbors(&map, &station),
+        parse::get_neighbors(&map, &station),
         vec![
             (2, 2, Direction::SOUTH),
             (2, 1, Direction::SOUTH),
@@ -288,7 +292,7 @@ fn test_get_neighbors_with_direction() {
     );
     station.modifiers = station.modifiers.with_priority(Direction::WEST);
     assert_eq!(
-        get_neighbors(&map, &station),
+        parse::get_neighbors(&map, &station),
         vec![
             (1, 0, Direction::WEST),
             (0, 1, Direction::NORTH),
