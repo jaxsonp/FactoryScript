@@ -75,6 +75,15 @@ pub struct SourceLocation {
     /// length of span
     pub len: usize,
 }
+impl SourceLocation {
+    pub fn at_start() -> Self {
+        Self {
+            line: 0,
+            col: 0,
+            len: 1,
+        }
+    }
+}
 impl std::fmt::Display for SourceLocation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}:{} +{}", self.line, self.col, self.len)
@@ -95,7 +104,7 @@ impl std::ops::Not for Direction {
         match self {
             Direction::NORTH => Direction::SOUTH,
             Direction::EAST => Direction::WEST,
-            Direction::SOUTH => Direction::SOUTH,
+            Direction::SOUTH => Direction::NORTH,
             Direction::WEST => Direction::EAST,
         }
     }
@@ -112,5 +121,18 @@ impl std::fmt::Display for Direction {
                 Direction::WEST => "west",
             }
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_direction_negation() {
+        assert_eq!(!Direction::NORTH, Direction::SOUTH);
+        assert_eq!(!Direction::EAST, Direction::WEST);
+        assert_eq!(!Direction::SOUTH, Direction::NORTH);
+        assert_eq!(!Direction::WEST, Direction::EAST);
     }
 }

@@ -32,8 +32,9 @@ pub fn process<'a>(
     for i in 0..stations.len() {
         debug!(3, " - #{i}'s inputs:",);
         for neighbor in parse::get_neighbors(&map, &mut stations[i]) {
-            // checking if each neighbor is an input bay and finding the origin of the conveyor belt
+            // checking if each neighbor is an input bay and finding the origin pos of the conveyor belt
             if let Some(origin_pos) = probe::evaluate_bay(&map, neighbor)? {
+                // finding station at the origin position
                 let mut origin_station: Option<usize> = None;
                 for j in 0..stations.len() {
                     if origin_pos.0 == stations[j].loc.line
@@ -55,12 +56,56 @@ pub fn process<'a>(
                         msg: String::from("Dangling conveyor belt, expected station"),
                     });
                 }
-                let origin_station = origin_station.unwrap();
-                let in_bay = stations[i].in_bays.len();
-                stations[origin_station].out_bays.push((i, in_bay));
-                stations[i].new_in_bay();
-                debug!(3, "    - conveyor belt from #{origin_station}");
+                let origin_station_i = origin_station.unwrap();
+
+                // checking if the origin station has multiple output bays (except joints)
+                if stations[origin_station_i].out_bays.len() >= 1
+                    && stations[origin_station_i].logic.id != "joint"
+                {
+                    return Err(Error {
+                        t: ErrorType::SyntaxError,
+                        loc: stations[origin_station_i].loc,
+                        msg: format!("Too many outputs, expected 1"),
+                    });
+                }
+
+                // checking if there are too many input bays (except joints)
+                if stations[i].in_bays.len() >= stations[i].logic.inputs
+                    && stations[i].logic.id != "joint"
+                {
+                    return Err(Error {
+                        t: ErrorType::SyntaxError,
+                        loc: stations[i].loc,
+                        msg: format!("Too many inputs, expected {}", stations[i].logic.inputs),
+                    });
+                }
+                let in_bay_i = stations[i].in_bays.len();
+                stations[origin_station_i].out_bays.push((i, in_bay_i));
+                stations[i].in_bays.push(None);
+                debug!(3, "    - from #{origin_station_i} to bay {in_bay_i}");
             }
+        }
+        // checking if station has required number of inputs
+        if stations[i].in_bays.len() < stations[i].logic.inputs && stations[i].logic.id != "joint" {
+            return Err(Error {
+                t: ErrorType::SyntaxError,
+                loc: stations[i].loc,
+                msg: format!(
+                    "Missing inputs, expected {}, found {}",
+                    stations[i].logic.inputs,
+                    stations[i].in_bays.len()
+                ),
+            });
+        // checking if joint station has at least one input
+        } else if stations[i].logic.id == "joint" && stations[i].in_bays.len() < 1 {
+            return Err(Error {
+                t: ErrorType::SyntaxError,
+                loc: stations[i].loc,
+                msg: format!(
+                    "Joint station expects at least 1 input, found {}",
+                    stations[i].in_bays.len()
+                ),
+            });
         }
     }
 

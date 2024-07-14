@@ -1,7 +1,11 @@
-use crate::*;
-use core::*;
 use regex::Regex;
 use std::collections::HashMap;
+
+use crate::*;
+use core::*;
+
+#[cfg(test)]
+mod tests;
 
 /// helper function to check if a string can be parsed into an integer
 ///

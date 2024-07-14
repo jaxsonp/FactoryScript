@@ -1,4 +1,5 @@
 - preprocessing inputs (checking theres the correct number of inputs)
+- error handling (print location, format in paragraph)
 - exit block logic
 - timing steps for debug
 - fix parsing to allow escaped chars
