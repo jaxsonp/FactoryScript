@@ -1,8 +1,5 @@
 use core::Pallet;
-use std::{
-    collections::HashMap,
-    time::{Duration, Instant},
-};
+use std::{collections::HashMap, time::Instant};
 
 use crate::*;
 
