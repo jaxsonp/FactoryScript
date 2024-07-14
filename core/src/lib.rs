@@ -60,12 +60,12 @@ impl std::fmt::Display for Pallet {
             f,
             "{}",
             match self {
-                Pallet::Empty => String::from("Pallet::Empty"),
-                Pallet::Bool(b) => format!("Pallet::Bool({})", if *b { "true" } else { "else" }),
-                Pallet::Char(c) => format!("Pallet::Char(\'{}\')", c),
-                Pallet::String(s) => format!("Pallet::String(\"{}\")", s),
-                Pallet::Int(i) => format!("Pallet::Int({})", i),
-                Pallet::Float(f) => format!("Pallet::Float({})", f),
+                Pallet::Empty => String::from("Pallet< >"),
+                Pallet::Bool(b) => format!("Pallet<b:{}>", if *b { "true" } else { "else" }),
+                Pallet::Char(c) => format!("Pallet<c:\'{}\'>", c),
+                Pallet::String(s) => format!("Pallet<s:\"{}\">", s),
+                Pallet::Int(i) => format!("Pallet<i:{}>", i),
+                Pallet::Float(f) => format!("Pallet<f:{}>", f),
             },
         )
     }

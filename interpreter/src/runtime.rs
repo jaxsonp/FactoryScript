@@ -44,7 +44,7 @@ pub fn execute(
             }
             if occupied_bays >= station.logic.inputs && station.logic.inputs > 0 {
                 // running procedures
-                debug!(3, " - Procedure triggered on #{i} ({:?})", station.logic.id);
+                debug!(3, " - Procedure triggered on #{i} ({})", station.logic.id);
                 // handling special case stations
                 if station.logic.has_id("assign") {
                     // special case: assign station
