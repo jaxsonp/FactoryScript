@@ -1,5 +1,8 @@
 use core::Pallet;
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    time::{Duration, Instant},
+};
 
 use crate::*;
 
@@ -9,6 +12,9 @@ pub fn execute(
     start_i: usize,
     assign_table: &HashMap<usize, Pallet>,
 ) -> Result<(), Error> {
+    // recording start time
+    let execution_start_t = Instant::now();
+
     // Vector of all pallets to move in the next step, tuple with the pallet and
     // the destination index and bay number
     let mut moving_pallets: Vec<(Pallet, (usize, usize))> = Vec::new();
@@ -19,6 +25,9 @@ pub fn execute(
     moving_pallets.push((Pallet::Empty, start_station.out_bays[0]));
     let mut t: usize = 0;
     while !moving_pallets.is_empty() {
+        // recording start time of iteration
+        let step_start_t = Instant::now();
+
         // moving the pallets
         for (pallet, dest) in moving_pallets.iter() {
             if stations[dest.0].in_bays[dest.1].is_some() {
@@ -113,9 +122,18 @@ pub fn execute(
                 station.clear_in_bays();
             }
         }
-        debug!(3, "Step {t} completed ( ms)");
+        debug!(
+            3,
+            "Step {t} completed ({:.3} ms)",
+            step_start_t.elapsed().as_secs_f64() * 1000.0
+        );
         t += 1;
     }
     debug!(2, "No remaining moving pallets");
+    debug!(
+        2,
+        "Execution finished in {}s",
+        execution_start_t.elapsed().as_secs_f64()
+    );
     return Ok(());
 }
