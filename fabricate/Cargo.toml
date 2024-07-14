@@ -1,5 +1,5 @@
 [package]
-name = "fabricate"
+name = "interpreter"
 description = "The official FactoryScript interpreter"
 version.workspace = true
 authors.workspace = true

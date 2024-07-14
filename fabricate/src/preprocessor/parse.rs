@@ -11,7 +11,7 @@ mod tests;
 ///
 /// # Example
 /// ```
-/// # use fabricate::preprocessor::parse::is_int;
+/// # use interpreter::preprocessor::parse::is_int;
 /// assert_eq!(is_int("1234"), true);
 /// assert_eq!(is_int("1_234_456"), true);
 /// assert_eq!(is_int("12.34"), false);
@@ -31,7 +31,7 @@ pub fn is_int(s: &str) -> bool {
 ///
 /// # Example
 /// ```
-/// # use fabricate::preprocessor::parse::is_float;
+/// # use interpreter::preprocessor::parse::is_float;
 /// assert_eq!(is_float("12.34"), true);
 /// assert_eq!(is_float("1234"), true);
 /// assert_eq!(is_float("1_234_456"), true);
@@ -62,7 +62,7 @@ pub fn is_float(s: &str) -> bool {
 ///
 /// # Example
 /// ```
-/// use fabricate::preprocessor::parse::get_char_index_from_byte_offset;
+/// use interpreter::preprocessor::parse::get_char_index_from_byte_offset;
 /// let s = "😼abcd";
 /// assert_eq!(get_char_index_from_byte_offset(4, s), 1);
 /// assert_eq!(get_char_index_from_byte_offset(6, s), 3);
