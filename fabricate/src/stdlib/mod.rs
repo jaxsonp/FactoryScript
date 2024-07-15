@@ -13,9 +13,12 @@ lazy_static! {
         &EXIT,
         &JOINT,
         &ASSIGN,
+        &AND,
         &io::PRINT,
         &io::PRINTLN,
-        &math::ADD
+        &math::EQUALS,
+        &math::NOT_EQUALS,
+        &math::ADD,
     ];
 }
 
@@ -45,7 +48,7 @@ pub static EXIT: StationType = StationType {
 
 pub static JOINT: StationType = StationType {
     id: "joint",
-    alt_id: Some(""),
+    alt_id: Some(" "),
     inputs: 1,
     output: true,
     procedure: none_procedure,
@@ -58,3 +61,30 @@ pub static ASSIGN: StationType = StationType {
     output: true,
     procedure: none_procedure,
 };
+
+pub static AND: StationType = StationType {
+    id: "and",
+    alt_id: None,
+    inputs: 2,
+    output: true,
+    procedure: and_procedure,
+};
+fn and_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match (&pallets[0], &pallets[1]) {
+        (Some(Pallet::Bool(b)), Some(pallet)) => Ok(if *b { Some(pallet.clone()) } else { None }),
+        (Some(pallet), Some(Pallet::Bool(b))) => Ok(if *b { Some(pallet.clone()) } else { None }),
+        _ => {
+            return Err(format!(
+                "Expected at least one boolean pallet, received ({}, {})\n",
+                match &pallets[0] {
+                    Some(pallet) => format!("{pallet}"),
+                    None => String::from("None"),
+                },
+                match &pallets[1] {
+                    Some(pallet) => format!("{pallet}"),
+                    None => String::from("None"),
+                },
+            ));
+        }
+    }
+}

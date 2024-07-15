@@ -196,15 +196,23 @@ pub fn discover_stations(
                 start_found = true;
             }
             // making sure the name is valid
-            for c in identifier.chars() {
-                if identifier != "" && !c.is_ascii_graphic() {
-                    return Err(Error {
-                        t: ErrorType::SyntaxError,
-                        loc,
-                        msg: String::from(
-                            "Station identifiers must only contain printable ascii characters",
-                        ),
-                    });
+            if identifier == "" {
+                return Err(Error {
+                    t: ErrorType::SyntaxError,
+                    loc,
+                    msg: String::from("Empty station identifier"),
+                });
+            } else if identifier != " " {
+                for c in identifier.chars() {
+                    if !c.is_ascii_graphic() {
+                        return Err(Error {
+                            t: ErrorType::SyntaxError,
+                            loc,
+                            msg: String::from(
+                                "Station identifiers must only contain printable ascii characters",
+                            ),
+                        });
+                    }
                 }
             }
 

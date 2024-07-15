@@ -1,5 +1,27 @@
 use core::*;
 
+pub static EQUALS: StationType = StationType {
+    id: "eq",
+    alt_id: Some("="),
+    inputs: 2,
+    output: true,
+    procedure: equals_procedure,
+};
+fn equals_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    return Ok(Some(Pallet::Bool(pallets[0] == pallets[1])));
+}
+
+pub static NOT_EQUALS: StationType = StationType {
+    id: "ne",
+    alt_id: Some("!="),
+    inputs: 2,
+    output: true,
+    procedure: not_equals_procedure,
+};
+fn not_equals_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    return Ok(Some(Pallet::Bool(pallets[0] != pallets[1])));
+}
+
 pub static ADD: StationType = StationType {
     id: "add",
     alt_id: Some("+"),
@@ -43,6 +65,7 @@ fn add_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String
         }
     }
 }
+
 /*
 pub static SUBTRACT: StationType = StationType {
     id: "subtract",

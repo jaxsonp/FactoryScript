@@ -55,9 +55,16 @@ impl Error {
         for line in src.split('\n').collect::<Vec<&str>>() {
             map.push(line.chars().collect());
         }
-        let mut output = format!("{} @ {}", self.t, self.loc);
+        let mut output = format!("{} @ {}\n        ", self.t, self.loc);
         let left_bound = self.loc.col.saturating_sub(24);
         let right_bound = min(80, self.loc.col + self.loc.len + 24);
+
+        for _ in left_bound..self.loc.col {
+            output += " ";
+        }
+        for _ in 0..self.loc.len {
+            output += "v";
+        }
 
         // closure to try and get a line of source code to print given an offset
         let try_get_ln = |offset: i32| -> String {
@@ -82,7 +89,7 @@ impl Error {
         {
             let left_bound = min(left_bound, map[self.loc.line].len().saturating_sub(1));
             let right_bound = min(right_bound, map[self.loc.line].len());
-            output += format!("\n\x1b[22m-{:->4}-| \x1b[2m", self.loc.line).as_str();
+            output += format!("\n\x1b[22m-{:->4}-| \x1b[2m", self.loc.line + 1).as_str();
             for c in map[self.loc.line][left_bound..self.loc.col].iter() {
                 output.push(*c);
             }
