@@ -4,13 +4,13 @@ pub static mut DEBUG_LEVEL: u8 = 0;
 use std::cmp::min;
 
 pub mod builtins;
+pub mod error;
 pub mod macros;
 pub mod preprocessor;
 pub mod runtime;
-pub mod station;
 
-use core::StationType;
-use station::*;
+use core::*;
+use error::{Error, ErrorType::*};
 
 pub type Namespace = Vec<&'static StationType<'static>>;
 
@@ -30,104 +30,83 @@ pub fn run<'a>(src: &String) -> Result<(), Error> {
     Ok(())
 }
 
-/// Custom error handling struct
+/// Instance of a station
 #[derive(Debug)]
-pub struct Error {
-    /// Error type
-    ///
-    /// named `t` cus `"type"` is a reserved keyword :_(
-    pub t: ErrorType,
-    /// Location the error originated from
+pub struct Station {
+    /// Location of the station in source code
     pub loc: SourceLocation,
-    /// Message
-    pub msg: String,
+    /// Station functionality and type information
+    pub logic: &'static StationType<'static>,
+    /// Modifiers duh
+    pub modifiers: StationModifiers,
+    /// Queues for each input bay
+    pub in_bays: Vec<Option<Pallet>>,
+    /// Map of each output bay connection in the form (station_index, in_bay_index)
+    pub out_bays: Vec<(usize, usize)>,
 }
-impl Error {
-    /// function for generating a pretty error message
-    pub fn pretty_msg(&self, src: &String) -> String {
-        // fancy error formatting
-        if self.loc == SourceLocation::none() {
-            // location in code is N/A
-            return format!("{}: {}", self.t, self.msg);
+impl Station {
+    pub fn new(
+        identifier: &str,
+        loc: SourceLocation,
+        modifiers: StationModifiers,
+        ns: &Namespace,
+    ) -> Result<Self, Error> {
+        for station_type in ns {
+            if station_type.has_id(identifier) {
+                return Ok(Self {
+                    loc,
+                    logic: station_type,
+                    modifiers,
+                    in_bays: Vec::new(),
+                    out_bays: Vec::new(),
+                });
+            }
         }
-        // generating 2d vector layout of source code
-        let mut map: Vec<Vec<char>> = Vec::new();
-        for line in src.split('\n').collect::<Vec<&str>>() {
-            map.push(line.chars().collect());
-        }
-        let mut output = format!("{} @ {}\n        ", self.t, self.loc);
-        let left_bound = self.loc.col.saturating_sub(24);
-        let right_bound = min(80, self.loc.col + self.loc.len + 24);
+        return Err(Error::new(
+            IdentifierError,
+            loc,
+            format!("Failed to find station type with identifier \"{identifier}\"").as_str(),
+        ));
+    }
 
-        for _ in left_bound..self.loc.col {
-            output += " ";
-        }
-        for _ in 0..self.loc.len {
-            output += "v";
-        }
-
-        // closure to try and get a line of source code to print given an offset
-        let try_get_ln = |offset: i32| -> String {
-            let line = (self.loc.line as i32) + offset;
-            if line < 0 || line as usize >= map.len() {
-                return String::new();
-            }
-            let line = line as usize;
-            let left_bound = min(left_bound, map[line].len().saturating_sub(1));
-            let right_bound = min(right_bound, map[line].len());
-            let mut output = format!("\n \x1b[22m{:>4} | \x1b[2m", line + 1);
-            for c in map[line][left_bound..right_bound].iter() {
-                output.push(*c);
-            }
-            return output;
-        };
-
-        // printing lines above
-        output += try_get_ln(-2).as_str();
-        output += try_get_ln(-1).as_str();
-        // printing line of error
-        {
-            let left_bound = min(left_bound, map[self.loc.line].len().saturating_sub(1));
-            let right_bound = min(right_bound, map[self.loc.line].len());
-            output += format!("\n\x1b[22m-{:->4}-| \x1b[2m", self.loc.line + 1).as_str();
-            for c in map[self.loc.line][left_bound..self.loc.col].iter() {
-                output.push(*c);
-            }
-            // bold and underline
-            output += "\x1b[22m\x1b[1m\x1b[4m";
-            for c in map[self.loc.line][self.loc.col..(self.loc.col + self.loc.len)].iter() {
-                output.push(*c);
-            }
-            output += "\x1b[24m\x1b[2m";
-            for c in map[self.loc.line][(self.loc.col + self.loc.len)..right_bound].iter() {
-                output.push(*c);
+    pub fn clear_in_bays(&mut self) {
+        for bay in self.in_bays.iter_mut() {
+            if bay.is_some() {
+                *bay = None;
             }
         }
-        // printing line below
-        output += try_get_ln(1).as_str();
-        output += try_get_ln(2).as_str();
-
-        output += "\x1b[22m\n";
-        output += self.msg.as_str();
-        return output;
     }
 }
 
-/// Types of handled errors
+/// Struct for holding the modifiers of an instance of a station
 #[derive(Debug)]
-pub enum ErrorType {
-    SyntaxError,
-    IdentifierError,
-    RuntimeError,
+pub struct StationModifiers {
+    /// Reverse input precedence (false=cw, true=ccw)
+    pub reverse: bool,
+    /// Which direction the precedence starts with
+    pub priority: Direction,
 }
-impl std::fmt::Display for ErrorType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            Self::SyntaxError => String::from("Syntax Error"),
-            Self::IdentifierError => String::from("Identifier Error"),
-            Self::RuntimeError => String::from("Runtime Error"),
-        };
-        write!(f, "{s}")
+impl StationModifiers {
+    /// Default modifiers for a station
+    pub fn default() -> Self {
+        Self {
+            reverse: false,
+            priority: Direction::NORTH,
+        }
+    }
+    /// toggles the reverse direction modifier
+    pub fn reverse(self) -> Self {
+        Self {
+            reverse: !self.reverse,
+            ..self
+        }
+    }
+    /// sets the direction with priority to a new value
+    pub fn with_priority(self, new_priority: Direction) -> Self {
+        Self {
+            priority: new_priority,
+            ..self
+        }
     }
 }
 
@@ -202,5 +181,57 @@ mod tests {
         assert_eq!(!Direction::EAST, Direction::WEST);
         assert_eq!(!Direction::SOUTH, Direction::NORTH);
         assert_eq!(!Direction::WEST, Direction::EAST);
+    }
+
+    #[test]
+    fn test_station_clear_in_bays() {
+        let mut station = Station::new(
+            "joint",
+            SourceLocation::none(),
+            StationModifiers::default(),
+            &builtins::MANIFEST,
+        )
+        .unwrap();
+        station.in_bays.push(Some(Pallet::Empty));
+        station.in_bays.push(Some(Pallet::Int(3)));
+        station.in_bays.push(Some(Pallet::Char('a')));
+        station.clear_in_bays();
+        assert!(station.in_bays[0].is_none());
+        assert!(station.in_bays[1].is_none());
+        assert!(station.in_bays[2].is_none());
+    }
+
+    #[test]
+    fn test_station_modifiers() {
+        assert!(matches!(
+            StationModifiers::default(),
+            StationModifiers {
+                reverse: false,
+                priority: Direction::NORTH
+            }
+        ));
+        assert!(matches!(
+            StationModifiers::default().reverse(),
+            StationModifiers {
+                reverse: true,
+                priority: Direction::NORTH
+            }
+        ));
+        assert!(matches!(
+            StationModifiers::default().with_priority(Direction::SOUTH),
+            StationModifiers {
+                reverse: false,
+                priority: Direction::SOUTH
+            }
+        ));
+        assert!(matches!(
+            StationModifiers::default()
+                .reverse()
+                .with_priority(Direction::EAST),
+            StationModifiers {
+                reverse: true,
+                priority: Direction::EAST
+            }
+        ));
     }
 }

@@ -121,11 +121,7 @@ pub fn discover_stations(
                 } else if stripped.starts_with('\'') && stripped.ends_with('\'') {
                     let chars: Vec<char> = stripped.chars().collect();
                     if chars.len() != 3 {
-                        return Err(Error {
-                            t: ErrorType::SyntaxError,
-                            loc,
-                            msg: String::from("Invalid character literal"),
-                        });
+                        return Err(Error::new(SyntaxError, loc, "Invalid character literal"));
                     }
                     Pallet::Char(chars[1])
                 } else if is_int(stripped) && stripped.len() > 0 {
@@ -133,11 +129,11 @@ pub fn discover_stations(
                     let num = match s.parse::<i32>() {
                         Ok(num) => num,
                         Err(e) => {
-                            return Err(Error {
-                                t: ErrorType::SyntaxError,
+                            return Err(Error::new(
+                                SyntaxError,
                                 loc,
-                                msg: format!("Failed to parse integer: {e}"),
-                            });
+                                format!("Failed to parse integer: {e}"),
+                            ));
                         }
                     };
                     Pallet::Int(num)
@@ -150,20 +146,20 @@ pub fn discover_stations(
                     let num = match s.parse::<f32>() {
                         Ok(num) => num,
                         Err(e) => {
-                            return Err(Error {
-                                t: ErrorType::SyntaxError,
+                            return Err(Error::new(
+                                SyntaxError,
                                 loc,
-                                msg: format!("Failed to parse float: {e}"),
-                            });
+                                format!("Failed to parse float: {e}"),
+                            ));
                         }
                     };
                     Pallet::Float(num)
                 } else {
-                    return Err(Error {
-                        t: ErrorType::SyntaxError,
+                    return Err(Error::new(
+                        SyntaxError,
                         loc,
-                        msg: format!("Unable to infer assignment type of \"{text}\""),
-                    });
+                        format!("Unable to infer assignment type of \"{text}\""),
+                    ));
                 };
                 debug!(3, " - #{} @ {} {} -> {}", stations.len(), loc, text, value);
                 assign_table.insert(stations.len(), value);
@@ -177,22 +173,20 @@ pub fn discover_stations(
             }
             let split: Vec<&str> = stripped.split(':').collect();
             if split.len() > 2 {
-                return Err(Error {
-                    t: ErrorType::SyntaxError,
+                return Err(Error::new(
+                    SyntaxError,
                     loc,
-                    msg: String::from(
-                        "Invalid station, modifiers must be of the form \"[<NAME>:<FLAGS>]\"",
-                    ),
-                });
+                    "Invalid station, modifiers must be of the form \"[<NAME>:<FLAGS>]\"",
+                ));
             }
             let identifier = split[0];
             if identifier == "start" {
                 if start_found {
-                    return Err(Error {
-                        t: ErrorType::SyntaxError,
+                    return Err(Error::new(
+                        SyntaxError,
                         loc,
-                        msg: String::from("Factory must only define one start station"),
-                    });
+                        "Factory must only define one start station",
+                    ));
                 }
                 start_index = stations.len();
                 start_found = true;
@@ -200,13 +194,11 @@ pub fn discover_stations(
             // making sure the name is valid
             for c in identifier.chars() {
                 if !c.is_ascii_graphic() {
-                    return Err(Error {
-                        t: ErrorType::SyntaxError,
+                    return Err(Error::new(
+                        SyntaxError,
                         loc,
-                        msg: String::from(
-                            "Station identifiers must only contain printable ascii characters",
-                        ),
-                    });
+                        "Station identifiers must only contain printable ascii characters",
+                    ));
                 }
             }
 
@@ -222,13 +214,11 @@ pub fn discover_stations(
                 // closure that checks if a direction modifier has already been specified
                 let mut check_multiple_directions = || -> Result<(), Error> {
                     if direction_specified {
-                        return Err(Error {
-                            t: ErrorType::SyntaxError,
+                        return Err(Error::new(
+                            SyntaxError,
                             loc,
-                            msg: String::from(
-                                "Each station must contain only one direction priority modifier",
-                            ),
-                        });
+                            "Each station must contain only one direction priority modifier",
+                        ));
                     }
                     direction_specified = true;
                     Ok(())
@@ -260,11 +250,11 @@ pub fn discover_stations(
         }
     }
     if !start_found {
-        return Err(Error {
-            t: ErrorType::SyntaxError,
-            loc: SourceLocation::none(),
-            msg: String::from("Unable to locate start station"),
-        });
+        return Err(Error::new(
+            SyntaxError,
+            SourceLocation::none(),
+            "Unable to locate start station",
+        ));
     }
     return Ok((stations, start_index, assign_table));
 }

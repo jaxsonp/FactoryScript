@@ -46,15 +46,15 @@ pub fn process<'a>(
                     }
                 }
                 if origin_station.is_none() {
-                    return Err(Error {
-                        t: ErrorType::SyntaxError,
-                        loc: SourceLocation {
+                    return Err(Error::new(
+                        SyntaxError,
+                        SourceLocation {
                             line: origin_pos.0,
                             col: origin_pos.1,
                             len: 1,
                         },
-                        msg: String::from("Conveyor belt origin detached, expected station here"),
-                    });
+                        "Conveyor belt origin detached, expected station here",
+                    ));
                 }
                 let origin_station_i = origin_station.unwrap();
 
@@ -62,22 +62,22 @@ pub fn process<'a>(
                 if stations[origin_station_i].out_bays.len() >= 1
                     && stations[origin_station_i].logic.id != "joint"
                 {
-                    return Err(Error {
-                        t: ErrorType::SyntaxError,
-                        loc: stations[origin_station_i].loc,
-                        msg: format!("Too many output bays, expected 1"),
-                    });
+                    return Err(Error::new(
+                        SyntaxError,
+                        stations[origin_station_i].loc,
+                        format!("Too many output bays, expected 1"),
+                    ));
                 }
 
                 // checking if there are too many input bays (except joints)
                 if stations[i].in_bays.len() >= stations[i].logic.inputs
                     && stations[i].logic.id != "joint"
                 {
-                    return Err(Error {
-                        t: ErrorType::SyntaxError,
-                        loc: stations[i].loc,
-                        msg: format!("Too many input bays, expected {}", stations[i].logic.inputs),
-                    });
+                    return Err(Error::new(
+                        SyntaxError,
+                        stations[i].loc,
+                        format!("Too many input bays, expected {}", stations[i].logic.inputs),
+                    ));
                 }
                 let in_bay_i = stations[i].in_bays.len();
                 stations[origin_station_i].out_bays.push((i, in_bay_i));
@@ -87,43 +87,39 @@ pub fn process<'a>(
         }
         // checking if station has required number of inputs
         if stations[i].in_bays.len() < stations[i].logic.inputs && stations[i].logic.id != "joint" {
-            return Err(Error {
-                t: ErrorType::SyntaxError,
-                loc: stations[i].loc,
-                msg: format!(
+            return Err(Error::new(
+                SyntaxError,
+                stations[i].loc,
+                format!(
                     "Missing input bays, expected {}, found {}",
                     stations[i].logic.inputs,
                     stations[i].in_bays.len()
                 ),
-            });
+            ));
         // checking if joint station has at least one input
         } else if stations[i].logic.id == "joint" && stations[i].in_bays.len() < 1 {
-            return Err(Error {
-                t: ErrorType::SyntaxError,
-                loc: stations[i].loc,
-                msg: format!(
+            return Err(Error::new(
+                SyntaxError,
+                stations[i].loc,
+                format!(
                     "Joint station expects at least 1 input bay, found {}",
                     stations[i].in_bays.len()
                 ),
-            });
+            ));
         }
     }
 
     // making sure the stations have outputs if they need them
     for station in stations.iter() {
         if station.logic.output && station.out_bays.len() < 1 {
-            return Err(Error {
-                t: ErrorType::SyntaxError,
-                loc: station.loc,
-                msg: String::from("Missing output bay"),
-            });
+            return Err(Error::new(SyntaxError, station.loc, "Missing output bay"));
         }
         if !station.logic.output && station.out_bays.len() > 0 {
-            return Err(Error {
-                t: ErrorType::SyntaxError,
-                loc: station.loc,
-                msg: String::from("Unexpected output bay"),
-            });
+            return Err(Error::new(
+                SyntaxError,
+                station.loc,
+                String::from("Unexpected output bay"),
+            ));
         }
     }
 

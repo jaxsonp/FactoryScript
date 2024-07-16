@@ -50,11 +50,11 @@ pub fn execute(
                     let new_pallet = if let Some(pallet) = assign_table.get(&i) {
                         pallet
                     } else {
-                        return Err(Error {
-                            t: ErrorType::RuntimeError,
-                            loc: station.loc,
-                            msg: format!("Can't find assign table entry for #{i}"),
-                        });
+                        return Err(Error::new(
+                            RuntimeError,
+                            station.loc,
+                            format!("Can't find assign table entry for #{i}"),
+                        ));
                     };
                     debug!(4, "    - Produced: {}", new_pallet);
                     moving_pallets.push((new_pallet.clone(), station.out_bays[0]));
@@ -83,33 +83,27 @@ pub fn execute(
                 match procedure(&station.in_bays) {
                     Ok(Some(p)) => {
                         if !station.logic.output {
-                            return Err(Error {
-                                t: ErrorType::RuntimeError,
-                                loc: station.loc,
-                                msg: String::from("Station procedure returned pallet unexpectedly"),
-                            });
+                            return Err(Error::new(
+                                RuntimeError,
+                                station.loc,
+                                "Station procedure returned pallet unexpectedly",
+                            ));
                         }
                         debug!(4, "    - produced: {}", p);
                         moving_pallets.push((p, station.out_bays[0]));
                     }
                     Ok(None) => {
                         if station.logic.output && station.logic.id != "and" {
-                            return Err(Error {
-                                t: ErrorType::RuntimeError,
-                                loc: station.loc,
-                                msg: String::from(
-                                    "Station procedured did not return pallet as expected",
-                                ),
-                            });
+                            return Err(Error::new(
+                                RuntimeError,
+                                station.loc,
+                                "Station procedured did not return pallet as expected",
+                            ));
                         }
                         debug!(4, "    - produced: None",);
                     }
                     Err(msg) => {
-                        return Err(Error {
-                            t: ErrorType::RuntimeError,
-                            loc: station.loc,
-                            msg,
-                        });
+                        return Err(Error::new(RuntimeError, station.loc, msg));
                     }
                 }
 
