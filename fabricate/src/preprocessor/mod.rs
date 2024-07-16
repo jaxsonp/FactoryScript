@@ -53,7 +53,7 @@ pub fn process<'a>(
                             col: origin_pos.1,
                             len: 1,
                         },
-                        msg: String::from("Dangling conveyor belt, expected station"),
+                        msg: String::from("Conveyor belt origin detached, expected station here"),
                     });
                 }
                 let origin_station_i = origin_station.unwrap();

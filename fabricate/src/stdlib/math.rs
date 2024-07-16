@@ -1,3 +1,4 @@
+use super::list_pallets;
 use core::*;
 
 pub static EQUALS: StationType = StationType {
@@ -20,6 +21,114 @@ pub static NOT_EQUALS: StationType = StationType {
 };
 fn not_equals_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     return Ok(Some(Pallet::Bool(pallets[0] != pallets[1])));
+}
+
+pub static GREATER_THAN: StationType = StationType {
+    id: "gt",
+    alt_id: Some(">"),
+    inputs: 2,
+    output: true,
+    procedure: greater_than_procedure,
+};
+fn greater_than_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match (&pallets[0], &pallets[1]) {
+        (Some(Pallet::Int(num1)), Some(Pallet::Int(num2))) => {
+            return Ok(Some(Pallet::Bool(num1 > num2)));
+        }
+        (Some(Pallet::Float(num1)), Some(Pallet::Float(num2))) => {
+            return Ok(Some(Pallet::Bool(num1 > num2)));
+        }
+        (Some(Pallet::Bool(bool1)), Some(Pallet::Bool(bool2))) => {
+            return Ok(Some(Pallet::Bool(bool1 > bool2)));
+        }
+        _ => {
+            return Err(format!(
+                "Expected numerical or boolean pallets, received: {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}
+
+pub static LESS_THAN: StationType = StationType {
+    id: "lt",
+    alt_id: Some("<"),
+    inputs: 2,
+    output: true,
+    procedure: less_than_procedure,
+};
+fn less_than_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match (&pallets[0], &pallets[1]) {
+        (Some(Pallet::Int(num1)), Some(Pallet::Int(num2))) => {
+            return Ok(Some(Pallet::Bool(num1 < num2)));
+        }
+        (Some(Pallet::Float(num1)), Some(Pallet::Float(num2))) => {
+            return Ok(Some(Pallet::Bool(num1 < num2)));
+        }
+        (Some(Pallet::Bool(bool1)), Some(Pallet::Bool(bool2))) => {
+            return Ok(Some(Pallet::Bool(bool1 < bool2)));
+        }
+        _ => {
+            return Err(format!(
+                "Expected numerical or boolean pallets, received: {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}
+
+pub static GREATER_THAN_EQUAL: StationType = StationType {
+    id: "gte",
+    alt_id: Some(">="),
+    inputs: 2,
+    output: true,
+    procedure: greater_than_equal_procedure,
+};
+fn greater_than_equal_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match (&pallets[0], &pallets[1]) {
+        (Some(Pallet::Int(num1)), Some(Pallet::Int(num2))) => {
+            return Ok(Some(Pallet::Bool(num1 >= num2)));
+        }
+        (Some(Pallet::Float(num1)), Some(Pallet::Float(num2))) => {
+            return Ok(Some(Pallet::Bool(num1 >= num2)));
+        }
+        (Some(Pallet::Bool(bool1)), Some(Pallet::Bool(bool2))) => {
+            return Ok(Some(Pallet::Bool(bool1 >= bool2)));
+        }
+        _ => {
+            return Err(format!(
+                "Expected numerical or boolean pallets, received: {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}
+
+pub static LESS_THAN_EQUAL: StationType = StationType {
+    id: "lte",
+    alt_id: Some("<="),
+    inputs: 2,
+    output: true,
+    procedure: less_than_equal_procedure,
+};
+fn less_than_equal_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match (&pallets[0], &pallets[1]) {
+        (Some(Pallet::Int(num1)), Some(Pallet::Int(num2))) => {
+            return Ok(Some(Pallet::Bool(num1 <= num2)));
+        }
+        (Some(Pallet::Float(num1)), Some(Pallet::Float(num2))) => {
+            return Ok(Some(Pallet::Bool(num1 <= num2)));
+        }
+        (Some(Pallet::Bool(bool1)), Some(Pallet::Bool(bool2))) => {
+            return Ok(Some(Pallet::Bool(bool1 <= bool2)));
+        }
+        _ => {
+            return Err(format!(
+                "Expected numerical or boolean pallets, received: {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
 }
 
 pub static ADD: StationType = StationType {
@@ -52,49 +161,165 @@ fn add_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String
         }
         _ => {
             return Err(format!(
-                "Unexpected pallets received: ({}, {})\n",
-                match &pallets[0] {
-                    Some(pallet) => format!("{pallet}"),
-                    None => String::from("None"),
-                },
-                match &pallets[1] {
-                    Some(pallet) => format!("{pallet}"),
-                    None => String::from("None"),
-                },
+                "Unexpected pallets received: {}\n",
+                list_pallets(pallets)
             ));
         }
     }
 }
 
-/*
 pub static SUBTRACT: StationType = StationType {
-    id: "subtract",
+    id: "sub",
     alt_id: Some("-"),
     inputs: 2,
     output: true,
     procedure: subtract_procedure,
 };
 fn subtract_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
-    match pallets[0] {
-        None => return Err(String::from("No pallets provided")),
-        Some(Pallet::Int(num1)) => {
-            if let Some(Pallet::Int(num2)) = pallets[1] {
-                return Ok(Some(Pallet::Int(num1 - num2)));
-            }
-            return Err(String::from("Mismatching types, expected integer pallet"));
+    match (&pallets[0], &pallets[1]) {
+        (Some(Pallet::Int(num1)), Some(Pallet::Int(num2))) => {
+            return Ok(Some(Pallet::Int(num1 - num2)));
         }
-        Some(Pallet::Float(num1)) => {
-            if let Some(Pallet::Float(num2)) = pallets[1] {
-                return Ok(Some(Pallet::Float(num1 - num2)));
-            }
-            return Err(String::from("Mismatching types, expected float pallet"));
+        (Some(Pallet::Float(num1)), Some(Pallet::Float(num2))) => {
+            return Ok(Some(Pallet::Float(num1 - num2)));
         }
         _ => {
             return Err(format!(
-                "Expected integer or float pallet, received {:?}",
-                pallets[0]
+                "Expected numerical pallets, received: {}\n",
+                list_pallets(pallets)
             ));
         }
     }
 }
- */
+
+pub static MULTIPLY: StationType = StationType {
+    id: "mult",
+    alt_id: Some("*"),
+    inputs: 2,
+    output: true,
+    procedure: multiply_procedure,
+};
+fn multiply_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match (&pallets[0], &pallets[1]) {
+        (Some(Pallet::Int(num1)), Some(Pallet::Int(num2))) => {
+            return Ok(Some(Pallet::Int(num1 * num2)));
+        }
+        (Some(Pallet::Float(num1)), Some(Pallet::Float(num2))) => {
+            return Ok(Some(Pallet::Float(num1 * num2)));
+        }
+        _ => {
+            return Err(format!(
+                "Expected numerical pallets, received: {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}
+
+pub static DIVIDE: StationType = StationType {
+    id: "div",
+    alt_id: Some("/"),
+    inputs: 2,
+    output: true,
+    procedure: divide_procedure,
+};
+fn divide_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match (&pallets[0], &pallets[1]) {
+        (Some(Pallet::Int(num1)), Some(Pallet::Int(num2))) => {
+            if *num2 == 0 {
+                return Err(String::from("Attempted divide by zero"));
+            }
+            return Ok(Some(Pallet::Int(num1 / num2)));
+        }
+        (Some(Pallet::Float(num1)), Some(Pallet::Float(num2))) => {
+            if *num2 == 0.0 {
+                return Err(String::from("Attempted divide by zero"));
+            }
+            return Ok(Some(Pallet::Float(num1 / num2)));
+        }
+        _ => {
+            return Err(format!(
+                "Expected numerical pallets, received: {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}
+
+pub static MODULO: StationType = StationType {
+    id: "mod",
+    alt_id: Some("%"),
+    inputs: 2,
+    output: true,
+    procedure: modulo_procedure,
+};
+fn modulo_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match (&pallets[0], &pallets[1]) {
+        (Some(Pallet::Int(num1)), Some(Pallet::Int(num2))) => {
+            if *num2 == 0 {
+                return Err(String::from("Attempted divide by zero"));
+            }
+            return Ok(Some(Pallet::Int(num1 % num2)));
+        }
+        (Some(Pallet::Float(num1)), Some(Pallet::Float(num2))) => {
+            if *num2 == 0.0 {
+                return Err(String::from("Attempted divide by zero"));
+            }
+            return Ok(Some(Pallet::Float(num1 % num2)));
+        }
+        _ => {
+            return Err(format!(
+                "Expected numerical pallets, received: {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}
+
+pub static INCREMENT: StationType = StationType {
+    id: "increment",
+    alt_id: Some("++"),
+    inputs: 1,
+    output: true,
+    procedure: increment_procedure,
+};
+fn increment_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match &pallets[0] {
+        Some(Pallet::Int(num)) => {
+            return Ok(Some(Pallet::Int(num + 1)));
+        }
+        Some(Pallet::Float(num)) => {
+            return Ok(Some(Pallet::Float(num + 1.0)));
+        }
+        _ => {
+            return Err(format!(
+                "Expected numerical pallets, received: {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}
+
+pub static DECREMENT: StationType = StationType {
+    id: "decrement",
+    alt_id: Some("--"),
+    inputs: 1,
+    output: true,
+    procedure: decrement_procedure,
+};
+fn decrement_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match &pallets[0] {
+        Some(Pallet::Int(num)) => {
+            return Ok(Some(Pallet::Int(num - 1)));
+        }
+        Some(Pallet::Float(num)) => {
+            return Ok(Some(Pallet::Float(num - 1.0)));
+        }
+        _ => {
+            return Err(format!(
+                "Expected numerical pallets, received: {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}

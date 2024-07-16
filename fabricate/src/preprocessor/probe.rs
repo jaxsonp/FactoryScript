@@ -12,29 +12,29 @@ pub fn evaluate_bay(
     let c = map[start.0][start.1];
 
     // checking if not a single belt character
-    if !SINGLE_BELTS.contains(c) {
+    if !SINGLE_BELT_CHARS.contains(c) {
         return Ok(None);
     }
 
     // checking if pointing into station
     match start.2 {
         Direction::NORTH => {
-            if !SOUTH_BELTS.contains(c) {
+            if !SOUTH_BELT_CHARS.contains(c) {
                 return Ok(None);
             }
         }
         Direction::EAST => {
-            if !WEST_BELTS.contains(c) {
+            if !WEST_BELT_CHARS.contains(c) {
                 return Ok(None);
             }
         }
         Direction::SOUTH => {
-            if !NORTH_BELTS.contains(c) {
+            if !NORTH_BELT_CHARS.contains(c) {
                 return Ok(None);
             }
         }
         Direction::WEST => {
-            if !EAST_BELTS.contains(c) {
+            if !EAST_BELT_CHARS.contains(c) {
                 return Ok(None);
             }
         }
@@ -57,28 +57,28 @@ pub fn probe(
     let mut c = map[pos.0][pos.1];
     loop {
         // checking if current char connects to previous char and turning
-        if facing == Direction::NORTH && SOUTH_BELTS.contains(c) {
+        if facing == Direction::NORTH && SOUTH_BELT_CHARS.contains(c) {
             match c {
                 '│' | '║' => {}
                 '┌' | '╔' => facing = Direction::EAST,
                 '┐' | '╗' => facing = Direction::WEST,
                 _ => panic!(),
             }
-        } else if facing == Direction::EAST && WEST_BELTS.contains(c) {
+        } else if facing == Direction::EAST && WEST_BELT_CHARS.contains(c) {
             match c {
                 '─' | '═' => {}
                 '┘' | '╝' => facing = Direction::NORTH,
                 '┐' | '╗' => facing = Direction::SOUTH,
                 _ => panic!(),
             }
-        } else if facing == Direction::SOUTH && NORTH_BELTS.contains(c) {
+        } else if facing == Direction::SOUTH && NORTH_BELT_CHARS.contains(c) {
             match c {
                 '│' | '║' => {}
                 '└' | '╚' => facing = Direction::EAST,
                 '┘' | '╝' => facing = Direction::WEST,
                 _ => panic!(),
             }
-        } else if facing == Direction::WEST && EAST_BELTS.contains(c) {
+        } else if facing == Direction::WEST && EAST_BELT_CHARS.contains(c) {
             match c {
                 '─' | '═' => {}
                 '└' | '╚' => facing = Direction::NORTH,
@@ -94,7 +94,7 @@ pub fn probe(
                     col: pos.1,
                     len: 1,
                 },
-                msg: String::from("Dangling belt"),
+                msg: String::from("Dangling belt, expected station out bay"),
             });
         }
         debug!(
@@ -130,7 +130,7 @@ pub fn probe(
             }
         }
         // if the last character was a double belt, we reached the origin
-        if DOUBLE_BELTS.contains(c) {
+        if DOUBLE_BELT_CHARS.contains(c) {
             debug!(4, "       - path ended at {}:{}", pos.0, pos.1);
             return Ok(pos);
         }

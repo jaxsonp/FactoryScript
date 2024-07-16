@@ -21,19 +21,12 @@ pub fn execute(
     debug!(3, "Start pallet spawned at #{start_i}");
     moving_pallets.push((Pallet::Empty, start_station.out_bays[0]));
     let mut t: usize = 0;
-    while !moving_pallets.is_empty() {
+    'execution_loop: while !moving_pallets.is_empty() {
         // recording start time of iteration
         let step_start_t = Instant::now();
 
         // moving the pallets
         for (pallet, dest) in moving_pallets.iter() {
-            if stations[dest.0].in_bays[dest.1].is_some() {
-                return Err(Error {
-                    t: ErrorType::RuntimeError,
-                    loc: stations[dest.0].loc,
-                    msg: format!("Station input bay {} is already occupied", dest.1),
-                });
-            }
             debug!(3, " - pallet moved to #{}:{} ({})", dest.0, dest.1, pallet);
             stations[dest.0].in_bays[dest.1] = Some(pallet.clone());
         }
@@ -52,7 +45,7 @@ pub fn execute(
                 // running procedures
                 debug!(3, " - Procedure triggered on #{i} ({})", station.logic.id);
                 // handling special case stations
-                if station.logic.has_id("assign") {
+                if station.logic.id == "assign" {
                     // special case: assign station
                     let new_pallet = if let Some(pallet) = assign_table.get(&i) {
                         pallet
@@ -67,7 +60,7 @@ pub fn execute(
                     moving_pallets.push((new_pallet.clone(), station.out_bays[0]));
                     station.clear_in_bays();
                     continue;
-                } else if station.logic.has_id("joint") {
+                } else if station.logic.id == "joint" {
                     // special case: joint station
                     for in_bay in station.in_bays.iter() {
                         if let Some(pallet) = in_bay {
@@ -79,6 +72,10 @@ pub fn execute(
                     }
                     station.clear_in_bays();
                     continue;
+                } else if station.logic.id == "exit" {
+                    // special case: exit
+                    debug!(2, "No remaining moving pallets");
+                    break 'execution_loop;
                 }
 
                 // executing general procedures
@@ -96,7 +93,7 @@ pub fn execute(
                         moving_pallets.push((p, station.out_bays[0]));
                     }
                     Ok(None) => {
-                        if station.logic.output {
+                        if station.logic.output && station.logic.id != "and" {
                             return Err(Error {
                                 t: ErrorType::RuntimeError,
                                 loc: station.loc,

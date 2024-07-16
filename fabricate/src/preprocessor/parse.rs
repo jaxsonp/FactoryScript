@@ -114,6 +114,8 @@ pub fn discover_stations(
                     Pallet::Bool(true)
                 } else if stripped == "false" {
                     Pallet::Bool(false)
+                } else if stripped.len() == 0 {
+                    Pallet::Empty
                 } else if stripped.starts_with('\"') && stripped.ends_with('\"') {
                     Pallet::String(String::from(&stripped[1..stripped.len() - 1]))
                 } else if stripped.starts_with('\'') && stripped.ends_with('\'') {
@@ -126,7 +128,7 @@ pub fn discover_stations(
                         });
                     }
                     Pallet::Char(chars[1])
-                } else if is_int(stripped) {
+                } else if is_int(stripped) && stripped.len() > 0 {
                     let s = stripped.replace('_', "");
                     let num = match s.parse::<i32>() {
                         Ok(num) => num,
@@ -196,23 +198,15 @@ pub fn discover_stations(
                 start_found = true;
             }
             // making sure the name is valid
-            if identifier == "" {
-                return Err(Error {
-                    t: ErrorType::SyntaxError,
-                    loc,
-                    msg: String::from("Empty station identifier"),
-                });
-            } else if identifier != " " {
-                for c in identifier.chars() {
-                    if !c.is_ascii_graphic() {
-                        return Err(Error {
-                            t: ErrorType::SyntaxError,
-                            loc,
-                            msg: String::from(
-                                "Station identifiers must only contain printable ascii characters",
-                            ),
-                        });
-                    }
+            for c in identifier.chars() {
+                if !c.is_ascii_graphic() {
+                    return Err(Error {
+                        t: ErrorType::SyntaxError,
+                        loc,
+                        msg: String::from(
+                            "Station identifiers must only contain printable ascii characters",
+                        ),
+                    });
                 }
             }
 

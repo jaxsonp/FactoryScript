@@ -2,25 +2,25 @@
 mod tests;
 
 /// All valid belt characters
-pub const BELTS: &str = "─│┌┐└┘═║╔╗╚╝";
+pub const BELT_CHARS: &str = "─│┌┐└┘═║╔╗╚╝";
 
 /// All single belt characters
-pub const SINGLE_BELTS: &str = "─│┌┐└┘";
+pub const SINGLE_BELT_CHARS: &str = "─│┌┐└┘";
 
 /// All double belt characters
-pub const DOUBLE_BELTS: &str = "═║╔╗╚╝";
+pub const DOUBLE_BELT_CHARS: &str = "═║╔╗╚╝";
 
 /// All north-connecting belt characters
-pub const NORTH_BELTS: &str = "│└┘║╚╝";
+pub const NORTH_BELT_CHARS: &str = "│└┘║╚╝";
 
 /// All east-connecting belt characters
-pub const EAST_BELTS: &str = "─┌└═╔╚";
+pub const EAST_BELT_CHARS: &str = "─┌└═╔╚";
 
 /// All south-connecting belt characters
-pub const SOUTH_BELTS: &str = "│┌┐║╔╗";
+pub const SOUTH_BELT_CHARS: &str = "│┌┐║╔╗";
 
 /// All west-connecting belt characters
-pub const WEST_BELTS: &str = "─┐┘═╗╝";
+pub const WEST_BELT_CHARS: &str = "─┐┘═╗╝";
 
 /// Defines a station and all the required information and functionality
 #[derive(Debug)]

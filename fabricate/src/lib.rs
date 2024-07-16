@@ -94,7 +94,7 @@ impl Error {
                 output.push(*c);
             }
             // bold and underline
-            output += "\x1b[4m\x1b[22m";
+            output += "\x1b[22m\x1b[1m\x1b[4m";
             for c in map[self.loc.line][self.loc.col..(self.loc.col + self.loc.len)].iter() {
                 output.push(*c);
             }
