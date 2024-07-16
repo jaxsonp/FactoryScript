@@ -91,7 +91,7 @@ mod test {
             "joint",
             SourceLocation::none(),
             StationModifiers::default(),
-            &stdlib::MANIFEST,
+            &builtins::MANIFEST,
         )
         .unwrap();
         station.in_bays.push(Some(Pallet::Empty));

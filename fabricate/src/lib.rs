@@ -3,11 +3,11 @@ pub static mut DEBUG_LEVEL: u8 = 0;
 
 use std::cmp::min;
 
+pub mod builtins;
 pub mod macros;
 pub mod preprocessor;
 pub mod runtime;
 pub mod station;
-pub mod stdlib;
 
 use core::StationType;
 use station::*;
@@ -17,7 +17,7 @@ pub type Namespace = Vec<&'static StationType<'static>>;
 pub fn run<'a>(src: &String) -> Result<(), Error> {
     debug!(2, "Initializing namespace...");
     let mut namespace: Namespace = Vec::new();
-    for name in (*stdlib::MANIFEST).iter() {
+    for name in (*builtins::MANIFEST).iter() {
         namespace.push(name);
     }
 
