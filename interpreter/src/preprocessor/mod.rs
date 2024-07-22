@@ -1,7 +1,6 @@
 use core::Pallet;
 use std::collections::HashMap;
 
-pub mod _parse;
 pub mod probe;
 pub mod station_parser;
 #[cfg(test)]
