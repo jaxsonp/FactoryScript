@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 
+mod literal_parser;
+
 use crate::*;
 use core::*;
+use literal_parser::parse_assign_literal;
 
 #[cfg(test)]
 mod tests;
@@ -156,22 +159,24 @@ pub fn parse_stations(
             State::AssignStation => match c {
                 '}' => {
                     debug!(4, "   - station end @ {}", pos);
-                    // parsing literal type
-                    println!("{cur_token}");
                     // creating new station
                     let new_station = Station::new(
                         "assign",
-                        SourceSpan::new(cur_station_pos, pos.col - cur_station_pos.col),
+                        SourceSpan::new(cur_station_pos, pos.col - cur_station_pos.col + 1),
                         StationModifiers::default(),
                         ns,
                     )?;
+                    // parsing literal type
+                    let assignment_value = parse_assign_literal(&cur_token, new_station.loc)?;
                     debug!(
                         3,
-                        " - #{} {} @ {}",
+                        " - #{} {} @ {} ({})",
                         stations.len(),
                         new_station.logic.id,
-                        new_station.loc
+                        new_station.loc,
+                        assignment_value
                     );
+                    assign_table.insert(stations.len(), assignment_value);
                     stations.push(new_station);
                     state = State::Default;
                 }
@@ -194,10 +199,10 @@ pub fn parse_stations(
                 c => {
                     cur_token.push(c);
                 }
-                _ => {}
             },
         }
 
+        // getting next char
         c = match get_next_char(&mut pos, char_map) {
             Some(c) => c,
             None => {
