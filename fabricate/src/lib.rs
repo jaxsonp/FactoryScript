@@ -14,7 +14,7 @@ use error::{Error, ErrorType::*};
 
 pub type Namespace = Vec<&'static StationType<'static>>;
 
-pub fn run<'a>(src: &String) -> Result<(), Error> {
+pub fn run<'a>(src: &str) -> Result<(), Error> {
     debug!(2, "Initializing namespace...");
     let mut namespace: Namespace = Vec::new();
     for name in (*builtins::MANIFEST).iter() {
@@ -22,8 +22,7 @@ pub fn run<'a>(src: &String) -> Result<(), Error> {
     }
 
     debug!(2, "Preprocessing...");
-    let lines: Vec<&str> = src.split('\n').collect();
-    let (mut stations, start_i, assign_table) = preprocessor::process(&lines, &namespace)?;
+    let (mut stations, start_i, assign_table) = preprocessor::process(src, &namespace)?;
 
     debug!(2, "Starting");
     runtime::execute(&mut stations, start_i, &assign_table)?;
@@ -34,7 +33,7 @@ pub fn run<'a>(src: &String) -> Result<(), Error> {
 #[derive(Debug)]
 pub struct Station {
     /// Location of the station in source code
-    pub loc: SourceLocation,
+    pub loc: SourceSpan,
     /// Station functionality and type information
     pub logic: &'static StationType<'static>,
     /// Modifiers duh
@@ -47,7 +46,7 @@ pub struct Station {
 impl Station {
     pub fn new(
         identifier: &str,
-        loc: SourceLocation,
+        loc: SourceSpan,
         modifiers: StationModifiers,
         ns: &Namespace,
     ) -> Result<Self, Error> {
@@ -79,7 +78,7 @@ impl Station {
 }
 
 /// Struct for holding the modifiers of an instance of a station
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct StationModifiers {
     /// Reverse input precedence (false=cw, true=ccw)
     pub reverse: bool,
@@ -110,30 +109,67 @@ impl StationModifiers {
     }
 }
 
+/// Trait to describe a type that references a location in the source code
+
 /// Defines the position of a span of characters in the source code, used for
 /// syntax parsing and error reporting
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub struct SourceLocation {
+pub struct SourcePos {
     /// line number
     pub line: usize,
     /// column number
     pub col: usize,
+}
+impl SourcePos {
+    pub fn new(line: usize, col: usize) -> Self {
+        Self { line, col }
+    }
+    pub fn zero() -> Self {
+        Self { line: 0, col: 0 }
+    }
+    pub fn spanning(&self, len: usize) -> SourceSpan {
+        SourceSpan::new(*self, len)
+    }
+}
+impl Into<SourceSpan> for SourcePos {
+    fn into(self) -> SourceSpan {
+        SourceSpan::new(self, 1)
+    }
+}
+impl std::fmt::Display for SourcePos {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}:{}", self.line + 1, self.col,)
+    }
+}
+
+/// Defines the position of a span of characters in the source code, used for
+/// syntax parsing and error reporting
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct SourceSpan {
+    /// line number
+    pub pos: SourcePos,
     /// length of span
     pub len: usize,
 }
-impl SourceLocation {
+impl SourceSpan {
     /// Value to represent if the source location is not applicable
-    pub fn none() -> Self {
+    pub fn new(pos: SourcePos, len: usize) -> Self {
+        Self { pos, len }
+    }
+    pub fn zero() -> Self {
         Self {
-            line: 0,
-            col: 0,
+            pos: SourcePos::zero(),
             len: 0,
         }
     }
 }
-impl std::fmt::Display for SourceLocation {
+impl std::fmt::Display for SourceSpan {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{}-{}", self.line + 1, self.col, self.col + self.len)
+        if self.len > 1 {
+            write!(f, "{}-{}", self.pos, self.pos.col + self.len)
+        } else {
+            write!(f, "{}", self.pos)
+        }
     }
 }
 
@@ -187,7 +223,7 @@ mod tests {
     fn test_station_clear_in_bays() {
         let mut station = Station::new(
             "joint",
-            SourceLocation::none(),
+            SourcePos::zero().spanning(0),
             StationModifiers::default(),
             &builtins::MANIFEST,
         )

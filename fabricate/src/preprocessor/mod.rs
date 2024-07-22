@@ -1,8 +1,9 @@
 use core::Pallet;
 use std::collections::HashMap;
 
-pub mod parse;
+pub mod _parse;
 pub mod probe;
+pub mod station_parser;
 #[cfg(test)]
 mod tests;
 
@@ -10,119 +11,159 @@ use crate::*;
 
 /// Preprocesses a source string, validating the syntax and grammar
 ///
-/// Returns a tuple containing a vector of stations and the index of the start
-/// station, or an `Error` if unsuccessful
+/// Returns a tuple containing a vector of stations and the assignment table, which
+/// store the index of every assign station and its corresponding assign value
 pub fn process<'a>(
-    lines: &Vec<&str>,
+    src: &str,
     ns: &Namespace,
 ) -> Result<(Vec<Station>, usize, HashMap<usize, Pallet>), Error> {
-    // discovery
+    // generating 2d vector layout of source code
+    let mut char_map: Vec<Vec<char>> = Vec::new();
+    let mut n_chars = 0;
+    for line in src.split('\n') {
+        let row = line.chars().collect::<Vec<char>>();
+        n_chars += row.len();
+        char_map.push(row);
+    }
+    if n_chars == 0 {
+        return Err(Error::new(SyntaxError, SourcePos::zero(), "Empty file"));
+    }
+
+    // station discovery
     debug!(3, "Discovering stations");
-    let (mut stations, start_index, assign_table) = parse::discover_stations(lines, ns)?;
+    let (mut stations, assign_table) = station_parser::parse_stations(&char_map, ns)?;
     debug!(3, "Found {} stations", stations.len());
 
-    // generating 2d vector layout of source code
-    let mut map: Vec<Vec<char>> = Vec::new();
-    for line in lines {
-        map.push(line.chars().collect());
-    }
-
-    // probing connected bays
-    debug!(3, "Parsing station bays");
+    // getting start station's index
+    let mut start_i: usize = 0;
+    let mut found_start = false;
     for i in 0..stations.len() {
-        debug!(3, " - #{i}'s inputs:",);
-        for neighbor in parse::get_neighbors(&map, &mut stations[i]) {
-            // checking if each neighbor is an input bay and finding the origin pos of the conveyor belt
-            if let Some(origin_pos) = probe::evaluate_bay(&map, neighbor)? {
-                // finding station at the origin position
-                let mut origin_station: Option<usize> = None;
-                for j in 0..stations.len() {
-                    if origin_pos.0 == stations[j].loc.line
-                        && origin_pos.1 >= stations[j].loc.col
-                        && origin_pos.1 < stations[j].loc.col + stations[j].loc.len
-                    {
-                        origin_station = Some(j);
-                        break;
-                    }
-                }
-                if origin_station.is_none() {
-                    return Err(Error::new(
-                        SyntaxError,
-                        SourceLocation {
-                            line: origin_pos.0,
-                            col: origin_pos.1,
-                            len: 1,
-                        },
-                        "Conveyor belt origin detached, expected station here",
-                    ));
-                }
-                let origin_station_i = origin_station.unwrap();
-
-                // checking if the origin station has multiple output bays (except joints)
-                if stations[origin_station_i].out_bays.len() >= 1
-                    && stations[origin_station_i].logic.id != "joint"
-                {
-                    return Err(Error::new(
-                        SyntaxError,
-                        stations[origin_station_i].loc,
-                        format!("Too many output bays, expected 1"),
-                    ));
-                }
-
-                // checking if there are too many input bays (except joints)
-                if stations[i].in_bays.len() >= stations[i].logic.inputs
-                    && stations[i].logic.id != "joint"
-                {
-                    return Err(Error::new(
-                        SyntaxError,
-                        stations[i].loc,
-                        format!("Too many input bays, expected {}", stations[i].logic.inputs),
-                    ));
-                }
-                let in_bay_i = stations[i].in_bays.len();
-                stations[origin_station_i].out_bays.push((i, in_bay_i));
-                stations[i].in_bays.push(None);
-                debug!(3, "    - from #{origin_station_i} to bay {in_bay_i}");
+        if stations[i].logic.id == "start" {
+            if found_start {
+                return Err(Error::new(
+                    SyntaxError,
+                    stations[i].loc,
+                    "Found multiple start stations",
+                ));
             }
-        }
-        // checking if station has required number of inputs
-        if stations[i].in_bays.len() < stations[i].logic.inputs && stations[i].logic.id != "joint" {
-            return Err(Error::new(
-                SyntaxError,
-                stations[i].loc,
-                format!(
-                    "Missing input bays, expected {}, found {}",
-                    stations[i].logic.inputs,
-                    stations[i].in_bays.len()
-                ),
-            ));
-        // checking if joint station has at least one input
-        } else if stations[i].logic.id == "joint" && stations[i].in_bays.len() < 1 {
-            return Err(Error::new(
-                SyntaxError,
-                stations[i].loc,
-                format!(
-                    "Joint station expects at least 1 input bay, found {}",
-                    stations[i].in_bays.len()
-                ),
-            ));
+            start_i = i;
+            found_start = true;
+            break;
         }
     }
-
-    // making sure the stations have outputs if they need them
-    for station in stations.iter() {
-        if station.logic.output && station.out_bays.len() < 1 {
-            return Err(Error::new(SyntaxError, station.loc, "Missing output bay"));
-        }
-        if !station.logic.output && station.out_bays.len() > 0 {
-            return Err(Error::new(
-                SyntaxError,
-                station.loc,
-                String::from("Unexpected output bay"),
-            ));
-        }
+    if !found_start {
+        return Err(Error::new(
+            SyntaxError,
+            SourcePos::zero(),
+            "Unable to locate start station",
+        ));
     }
 
     debug!(2, "Finished preprocessing");
-    Ok((stations, start_index, assign_table))
+    Ok((stations, 0, assign_table))
 }
+
+/*
+pub fn get_neighbors(map: &Vec<Vec<char>>, station: &Station) -> Vec<(usize, usize, Direction)> {
+    let mut neighbors: Vec<(usize, usize, Direction)> = Vec::new();
+
+    let mut northern_neighbors: Vec<(usize, usize, Direction)> = Vec::new();
+    if station.loc.pos.line > 0 {
+        for i in 0..station.loc.len {
+            if station.loc.pos.col + i < map[station.loc.pos.line - 1].len() {
+                northern_neighbors.push((
+                    station.loc.pos.line - 1,
+                    station.loc.pos.col + i,
+                    Direction::NORTH,
+                ));
+            }
+        }
+    }
+    let mut eastern_neighbors: Vec<(usize, usize, Direction)> = Vec::new();
+    if station.loc.pos.col + station.loc.len < map[station.loc.pos.line].len() {
+        eastern_neighbors.push((
+            station.loc.pos.line,
+            station.loc.pos.col + station.loc.len,
+            Direction::EAST,
+        ));
+    }
+    let mut southern_neighbors: Vec<(usize, usize, Direction)> = Vec::new();
+    if station.loc.pos.line < (map.len() - 1) {
+        for i in (0..station.loc.len).rev() {
+            if station.loc.pos.col + i < map[station.loc.pos.line + 1].len() {
+                southern_neighbors.push((
+                    station.loc.pos.line + 1,
+                    station.loc.pos.col + i,
+                    Direction::SOUTH,
+                ));
+            }
+        }
+    }
+    let mut western_neighbors: Vec<(usize, usize, Direction)> = Vec::new();
+    if station.loc.pos.col > 0 {
+        western_neighbors.push((
+            station.loc.pos.line,temporal
+            station.loc.pos.col - 1,
+            Direction::WEST,
+        ));
+    }
+
+    if !station.modifiers.reverse {
+        // clockwise
+        match station.modifiers.priority {
+            Direction::NORTH => {
+                neighbors.extend(northern_neighbors);
+                neighbors.extend(eastern_neighbors);
+                neighbors.extend(southern_neighbors);
+                neighbors.extend(western_neighbors);
+            }
+            Direction::EAST => {
+                neighbors.extend(eastern_neighbors);
+                neighbors.extend(southern_neighbors);
+                neighbors.extend(western_neighbors);
+                neighbors.extend(northern_neighbors);
+            }
+            Direction::SOUTH => {
+                neighbors.extend(southern_neighbors);
+                neighbors.extend(western_neighbors);
+                neighbors.extend(northern_neighbors);
+                neighbors.extend(eastern_neighbors);
+            }
+            Direction::WEST => {
+                neighbors.extend(western_neighbors);
+                neighbors.extend(northern_neighbors);
+                neighbors.extend(eastern_neighbors);
+                neighbors.extend(southern_neighbors);
+            }
+        }
+    } else {
+        // counter clockwise
+        match station.modifiers.priority {
+            Direction::NORTH => {
+                neighbors.extend(northern_neighbors.iter().rev());
+                neighbors.extend(western_neighbors);
+                neighbors.extend(southern_neighbors.iter().rev());
+                neighbors.extend(eastern_neighbors);
+            }
+            Direction::EAST => {
+                neighbors.extend(eastern_neighbors);
+                neighbors.extend(northern_neighbors.iter().rev());
+                neighbors.extend(western_neighbors);
+                neighbors.extend(southern_neighbors.iter().rev());
+            }
+            Direction::SOUTH => {
+                neighbors.extend(southern_neighbors.iter().rev());
+                neighbors.extend(eastern_neighbors);
+                neighbors.extend(northern_neighbors.iter().rev());
+                neighbors.extend(western_neighbors);
+            }
+            Direction::WEST => {
+                neighbors.extend(western_neighbors);
+                neighbors.extend(southern_neighbors.iter().rev());
+                neighbors.extend(eastern_neighbors);
+                neighbors.extend(northern_neighbors.iter().rev());
+            }
+        }
+    }
+    return neighbors;
+} */

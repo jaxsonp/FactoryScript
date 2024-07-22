@@ -89,11 +89,7 @@ pub fn probe(
             // dangling belt
             return Err(Error::new(
                 SyntaxError,
-                SourceLocation {
-                    line: pos.0,
-                    col: pos.1,
-                    len: 1,
-                },
+                SourceSpan::new(SourcePos::new(pos.0, pos.1), 1),
                 "Dangling belt, expected station out bay",
             ));
         }
@@ -141,11 +137,7 @@ pub fn probe(
     // dangling belt out of bounds
     return Err(Error::new(
         SyntaxError,
-        SourceLocation {
-            line: pos.0,
-            col: pos.1,
-            len: 1,
-        },
+        SourceSpan::new(SourcePos::new(pos.0, pos.1), 1),
         "Dangling belt, out of bounds",
     ));
 }
