@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::process::ExitCode;
 
-use fabricate::*;
+use interpreter::*;
 
 fn main() -> ExitCode {
     let cli = Cli::parse();

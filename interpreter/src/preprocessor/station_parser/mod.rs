@@ -94,7 +94,7 @@ pub fn parse_stations(
                     debug!(4, "   - station end @ {}", pos);
                     let new_station = Station::new(
                         cur_token.as_str(),
-                        SourceSpan::new(cur_station_pos, cur_token.len()),
+                        SourceSpan::new(cur_station_pos, cur_token.len() + 2),
                         StationModifiers::default(),
                         ns,
                     )?;
@@ -211,6 +211,10 @@ pub fn parse_stations(
             }
         };
     }
-
-    return Ok((stations, assign_table));
+    match state {
+        State::Default => {
+            return Ok((stations, assign_table));
+        }
+        _ => return Err(Error::new(SyntaxError, cur_station_pos, "Unexpected EOF")),
+    }
 }
