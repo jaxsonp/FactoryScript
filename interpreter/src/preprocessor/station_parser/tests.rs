@@ -157,5 +157,6 @@ fn test_parse_assign_literal_float() {
         Pallet::Float(123456789f32)
     );
     assert!(parse_assign_literal(&"123f1".to_owned(), SourceSpan::zero()).is_err());
-    assert!(parse_assign_literal(&"12*3.0".to_owned(), SourceSpan::zero()).is_err());
+    assert!(parse_assign_literal(&"1.23.4".to_owned(), SourceSpan::zero()).is_err());
+    assert!(parse_assign_literal(&"12a3.0".to_owned(), SourceSpan::zero()).is_err());
 }

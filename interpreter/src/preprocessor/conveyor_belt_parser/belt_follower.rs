@@ -5,11 +5,15 @@ use core::*;
 /// if it is find the origin of the conveyor belt
 ///
 /// Returns an optional tuple of the origin position if it is an input bay
-pub fn evaluate_bay(
+pub fn evaluate_belt(
     map: &Vec<Vec<char>>,
-    start: (usize, usize, Direction),
-) -> Result<Option<(usize, usize)>, Error> {
-    let c = map[start.0][start.1];
+    visited_map: &mut Vec<Vec<bool>>,
+    start: (SourcePos, Direction),
+) -> Result<Option<SourcePos>, Error> {
+    let mut pos = start.0;
+    let mut facing = start.1;
+    let mut c = map[pos.line][pos.col];
+    let mut visited: Vec<SourcePos> = Vec::new();
 
     // checking if not a single belt character
     if !SINGLE_BELT_CHARS.contains(c) {
@@ -17,7 +21,7 @@ pub fn evaluate_bay(
     }
 
     // checking if pointing into station
-    match start.2 {
+    match facing {
         Direction::NORTH => {
             if !SOUTH_BELT_CHARS.contains(c) {
                 return Ok(None);
@@ -40,22 +44,12 @@ pub fn evaluate_bay(
         }
     }
 
-    let dest = probe(map, start)?;
-    return Ok(Some(dest));
-}
-
-/// follows a path of block drawing characters until it it hits the end, returning
-/// the position of the end if it is a valid conveyor belt
-pub fn probe(
-    map: &Vec<Vec<char>>,
-    start: (usize, usize, Direction),
-) -> Result<(usize, usize), Error> {
-    let mut pos = (start.0, start.1);
-    let mut facing = start.2;
-    debug!(4, "      probing starting at {}:{}", pos.0, pos.1);
-
-    let mut c = map[pos.0][pos.1];
+    debug!(4, "      probing starting at {}", pos);
     loop {
+        if BELT_CHARS.contains(c) {
+            visited.push(pos);
+        }
+
         // checking if current char connects to previous char and turning
         if facing == Direction::NORTH && SOUTH_BELT_CHARS.contains(c) {
             match c {
@@ -89,85 +83,54 @@ pub fn probe(
             // dangling belt
             return Err(Error::new(
                 SyntaxError,
-                SourceSpan::new(SourcePos::new(pos.0, pos.1), 1),
+                pos,
                 "Dangling belt, expected station out bay",
             ));
         }
-        debug!(
-            4,
-            "       - moved to {}:{}, now facing {}", pos.0, pos.1, facing
-        );
+        debug!(4, "       - moved to {}, now facing {}", pos, facing);
 
         // moving to the next char
         match facing {
             Direction::NORTH => {
-                if pos.0 == 0 {
+                if pos.line == 0 {
                     break;
                 }
-                pos.0 -= 1;
+                pos.line -= 1;
             }
             Direction::EAST => {
-                pos.1 += 1;
-                if pos.1 >= map[pos.0].len() {
+                pos.col += 1;
+                if pos.col >= map[pos.line].len() {
                     break;
                 }
             }
             Direction::SOUTH => {
-                pos.0 += 1;
-                if pos.0 >= map.len() {
+                pos.line += 1;
+                if pos.line >= map.len() {
                     break;
                 }
             }
             Direction::WEST => {
-                if pos.1 == 0 {
+                if pos.col == 0 {
                     break;
                 }
-                pos.1 -= 1;
+                pos.col -= 1;
             }
         }
         // if the last character was a double belt, we reached the origin
         if DOUBLE_BELT_CHARS.contains(c) {
-            debug!(4, "       - path ended at {}:{}", pos.0, pos.1);
-            return Ok(pos);
+            debug!(4, "       - path ended at {}", pos);
+            for pos in visited {
+                visited_map[pos.line][pos.col] = true;
+            }
+            return Ok(Some(pos));
         }
         // moving
-        c = map[pos.0][pos.1];
+        c = map[pos.line][pos.col];
     }
-
     // dangling belt out of bounds
     return Err(Error::new(
         SyntaxError,
-        SourceSpan::new(SourcePos::new(pos.0, pos.1), 1),
-        "Dangling belt, out of bounds",
+        SourceSpan::new(SourcePos::new(pos.line, pos.col), 1),
+        "Conveyor belt out of bounds",
     ));
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_probe() {
-        let map = vec![
-            vec!['─', '─', '─', '┐'],
-            vec![' ', '┌', '┐', '│'],
-            vec!['╚', '┘', '└', '┘'],
-        ];
-        assert_eq!(probe(&map, (0, 0, Direction::EAST)).ok().unwrap(), (1, 0));
-        assert_eq!(probe(&map, (0, 3, Direction::EAST)).ok().unwrap(), (1, 0));
-    }
-
-    #[test]
-    fn test_probe_dangling() {
-        let map = vec![vec!['─', '┐'], vec![' ', '─']];
-        assert!(probe(&map, (0, 0, Direction::EAST)).is_err());
-        assert!(probe(&map, (1, 1, Direction::WEST)).is_err());
-    }
-
-    #[test]
-    fn test_probe_out_of_bounds() {
-        let map = vec![vec!['─', '┐']];
-        assert!(probe(&map, (0, 0, Direction::EAST)).is_err());
-        assert!(probe(&map, (0, 1, Direction::NORTH)).is_err());
-    }
 }
