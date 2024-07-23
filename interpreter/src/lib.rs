@@ -1,10 +1,7 @@
 pub static mut COLOR_OUTPUT: bool = false;
 pub static mut DEBUG_LEVEL: u8 = 0;
 
-use std::{
-    cmp::min,
-    time::{Duration, Instant},
-};
+use std::{cmp::min, time::Instant};
 
 pub mod builtins;
 pub mod error;

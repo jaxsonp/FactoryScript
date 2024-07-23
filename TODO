@@ -1,5 +1,7 @@
-- integration tests
 - Crossing conveyor belts
+- std input
+- no dangling belts
+- constants
 - buffer station?
 - functions
 - modules

@@ -58,7 +58,7 @@ impl Error {
             let line = line as usize;
             let left_bound = min(left_bound, char_map[line].len().saturating_sub(1));
             let right_bound = min(right_bound, char_map[line].len());
-            let mut output = format!("\n \x1b[22m{:>4} | \x1b[2m", line + 1);
+            let mut output = format!("\n\x1b[22m {:>4} | \x1b[2m", line + 1);
             for c in char_map[line][left_bound..right_bound].iter() {
                 output.push(*c);
             }
