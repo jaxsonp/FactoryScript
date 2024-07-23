@@ -2,14 +2,15 @@ use core::*;
 use lazy_static::lazy_static;
 use std::ops::Not;
 
-#[cfg(test)]
-mod tests;
-
+pub mod constants;
 mod io;
 mod math;
 
+#[cfg(test)]
+mod tests;
+
 lazy_static! {
-    pub static ref MANIFEST: Vec<&'static StationType<'static>> = vec![
+    pub static ref STATION_TYPES: Vec<&'static StationType<'static>> = vec![
         &START,
         &EXIT,
         &JOINT,

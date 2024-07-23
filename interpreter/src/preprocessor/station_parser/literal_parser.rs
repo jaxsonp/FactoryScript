@@ -15,6 +15,8 @@ pub fn parse_assign_literal(s: &String, loc: SourceSpan) -> Result<Pallet, Error
             // boolean false
             return Ok(Pallet::Bool(false));
         }
+        "pi" => return Ok(builtins::constants::PI.clone()),
+        "e" => return Ok(builtins::constants::E.clone()),
         _ => {}
     }
 

@@ -17,15 +17,9 @@ pub type Namespace = Vec<&'static StationType<'static>>;
 pub fn run(src: &str, print_benchmark: bool) -> Result<(), Error> {
     let start_time = Instant::now();
 
-    debug!(2, "Initializing namespace...");
-    let mut namespace: Namespace = Vec::new();
-    for name in (*builtins::MANIFEST).iter() {
-        namespace.push(name);
-    }
-
-    let preprocess_start_time = Instant::now();
     debug!(2, "Preprocessing...");
-    let (mut stations, start_i, assign_table) = preprocessor::process(src, &namespace)?;
+    let (mut stations, start_i, assign_table) =
+        preprocessor::process(src, &builtins::STATION_TYPES)?;
     let runtime_start_time = Instant::now();
     debug!(2, "Starting");
     runtime::execute(&mut stations, start_i, &assign_table)?;
@@ -33,7 +27,7 @@ pub fn run(src: &str, print_benchmark: bool) -> Result<(), Error> {
     if print_benchmark {
         let end_time = Instant::now();
         let preprocess_duration: f64 =
-            ((runtime_start_time - preprocess_start_time).as_nanos() as f64) / 1000000000.0;
+            ((runtime_start_time - start_time).as_nanos() as f64) / 1000000000.0;
         let runtime_duration: f64 =
             ((end_time - runtime_start_time).as_nanos() as f64) / 1000000000.0;
         let total_duration: f64 = ((end_time - start_time).as_nanos() as f64) / 1000000000.0;
@@ -242,7 +236,7 @@ mod tests {
             "joint",
             SourcePos::zero().spanning(0),
             StationModifiers::default(),
-            &builtins::MANIFEST,
+            &builtins::STATION_TYPES,
         )
         .unwrap();
         station.in_bays.push(Some(Pallet::Empty));

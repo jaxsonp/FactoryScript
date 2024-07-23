@@ -24,7 +24,7 @@ fn test_get_next_char() {
 #[test]
 fn test_parse_stations() {
     let char_map = make_char_map("[start] [print]\n  [exit]");
-    let (stations, _) = parse_stations(&char_map, &builtins::MANIFEST).unwrap();
+    let (stations, _) = parse_stations(&char_map, &builtins::STATION_TYPES).unwrap();
     assert_eq!(stations[0].logic.id, "start");
     assert_eq!(stations[0].loc, SourceSpan::new(SourcePos::zero(), 7));
     assert_eq!(stations[1].logic.id, "print");
@@ -36,13 +36,13 @@ fn test_parse_stations() {
 #[test]
 fn test_parse_stations_incomplete() {
     let char_map = make_char_map("[start] [print]\n  [ex");
-    assert!(parse_stations(&char_map, &builtins::MANIFEST).is_err());
+    assert!(parse_stations(&char_map, &builtins::STATION_TYPES).is_err());
 }
 
 #[test]
 fn test_parse_stations_assign() {
     let char_map = make_char_map("[start] {} [exit]");
-    let (stations, _) = parse_stations(&char_map, &builtins::MANIFEST).unwrap();
+    let (stations, _) = parse_stations(&char_map, &builtins::STATION_TYPES).unwrap();
     assert_eq!(stations[0].logic.id, "start");
     assert_eq!(stations[0].loc, SourceSpan::new(SourcePos::zero(), 7));
     assert_eq!(stations[1].logic.id, "assign");
@@ -54,7 +54,7 @@ fn test_parse_stations_assign() {
 #[test]
 fn test_parse_stations_joint() {
     let char_map = make_char_map("[start] [] [exit]");
-    let (stations, _) = parse_stations(&char_map, &builtins::MANIFEST).unwrap();
+    let (stations, _) = parse_stations(&char_map, &builtins::STATION_TYPES).unwrap();
     assert_eq!(stations[0].logic.id, "start");
     assert_eq!(stations[0].loc, SourceSpan::new(SourcePos::zero(), 7));
     assert_eq!(stations[1].logic.id, "joint");
