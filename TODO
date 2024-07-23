@@ -1,6 +1,4 @@
-- unit tests for belt parsing
 - integration tests
-- benchmark function in cli
 - Crossing conveyor belts
 - buffer station?
 - functions

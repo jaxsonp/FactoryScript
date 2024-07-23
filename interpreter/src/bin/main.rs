@@ -46,7 +46,7 @@ fn main() -> ExitCode {
         "Contents --------------\n{}\n-----------------------", file_contents
     );
 
-    match run(&file_contents) {
+    match run(&file_contents, cli.benchmark) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
             print_err!("{}", e.pretty_msg(&file_contents));
@@ -61,6 +61,10 @@ fn main() -> ExitCode {
 struct Cli {
     /// Conveyor program to execute
     file: Option<String>,
+
+    /// Print benchmarking information after completion
+    #[arg(short, long)]
+    benchmark: bool,
 
     /// Increase debug logging level, can be supplied multiple times
     #[arg(short = 'd', long = "verbose", action = clap::ArgAction::Count)]

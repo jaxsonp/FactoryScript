@@ -1,7 +1,10 @@
 pub static mut COLOR_OUTPUT: bool = false;
 pub static mut DEBUG_LEVEL: u8 = 0;
 
-use std::cmp::min;
+use std::{
+    cmp::min,
+    time::{Duration, Instant},
+};
 
 pub mod builtins;
 pub mod error;
@@ -14,18 +17,35 @@ use error::{Error, ErrorType::*};
 
 pub type Namespace = Vec<&'static StationType<'static>>;
 
-pub fn run<'a>(src: &str) -> Result<(), Error> {
+pub fn run(src: &str, print_benchmark: bool) -> Result<(), Error> {
+    let start_time = Instant::now();
+
     debug!(2, "Initializing namespace...");
     let mut namespace: Namespace = Vec::new();
     for name in (*builtins::MANIFEST).iter() {
         namespace.push(name);
     }
 
+    let preprocess_start_time = Instant::now();
     debug!(2, "Preprocessing...");
     let (mut stations, start_i, assign_table) = preprocessor::process(src, &namespace)?;
-
+    let runtime_start_time = Instant::now();
     debug!(2, "Starting");
     runtime::execute(&mut stations, start_i, &assign_table)?;
+
+    if print_benchmark {
+        let end_time = Instant::now();
+        let preprocess_duration: f64 =
+            ((runtime_start_time - preprocess_start_time).as_nanos() as f64) / 1000000000.0;
+        let runtime_duration: f64 =
+            ((end_time - runtime_start_time).as_nanos() as f64) / 1000000000.0;
+        let total_duration: f64 = ((end_time - start_time).as_nanos() as f64) / 1000000000.0;
+        println!(
+            "\n======Benchmark======\n preprocess {:.5}s\n runtime    {:.5}s\n total      {:.5}s\n=====================",
+            preprocess_duration, runtime_duration, total_duration
+        );
+    }
+
     Ok(())
 }
 
