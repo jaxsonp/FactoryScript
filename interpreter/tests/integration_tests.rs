@@ -17,7 +17,7 @@ fn test_hello_world() {
         .unwrap();
     let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
     cmd.arg(file.path());
-    cmd.assert().stdout("hello world\n");
+    cmd.assert().success().stdout("hello world\n");
 }
 
 /// for robustness :D
@@ -39,7 +39,7 @@ fn test_hello_world_fancy() {
     .unwrap();
     let mut cmd = Command::cargo_bin("factory").unwrap();
     cmd.arg(file.path());
-    cmd.assert().stdout("hello world\n");
+    cmd.assert().success().stdout("hello world\n");
 }
 
 #[test]
@@ -49,7 +49,7 @@ fn test_hello_world_reverse() {
         .unwrap();
     let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
     cmd.arg(file.path());
-    cmd.assert().stdout("hello world\n");
+    cmd.assert().success().stdout("hello world\n");
 }
 
 #[test]
@@ -81,7 +81,7 @@ fn test_float_arithmetic() {
     .unwrap();
     let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
     cmd.arg(file.path());
-    cmd.assert().stdout("2.5\n3.5\n7\n3.5\n");
+    cmd.assert().success().stdout("2.5\n3.5\n7\n3.5\n");
 }
 
 #[test]
@@ -100,5 +100,25 @@ fn test_for_loop() {
     .unwrap();
     let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
     cmd.arg(file.path());
-    cmd.assert().stdout("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n");
+    cmd.assert()
+        .success()
+        .stdout("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n");
+}
+
+#[test]
+fn test_greeting() {
+    let file = NamedTempFile::new("tmp").unwrap();
+    file.write_str(
+        "
+[start]═─{\"What is your name? \"}═─[]═─[]═─[readln]═─[]═────────[+]═─[]═─{'!'}═─[+]═─[println]
+                                  ╚─[print]         ╚─{\"Hello \"}═┘   ╚─────────┘
+    ",
+    )
+    .unwrap();
+    let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
+    cmd.arg(file.path());
+    cmd.write_stdin("Jaxson");
+    cmd.assert()
+        .success()
+        .stdout("What is your name? Hello Jaxson!\n");
 }

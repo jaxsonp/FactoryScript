@@ -1,0 +1,2 @@
+[start]═─{"What is your name? "}═─[]═─[]═─[readln]═─[]═────────[+]═─[]═─{'!'}═─[+]═─[println]
+                                  ╚─[print]         ╚─{"Hello "}═┘   ╚─────────┘

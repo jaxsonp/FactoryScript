@@ -62,9 +62,11 @@ fn readln_procedure(_: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match stdin().read_line(&mut input) {
         Err(e) => return Err(e.to_string()),
         Ok(_) => {
-            return Ok(Some(Pallet::String(
-                input.strip_suffix('\n').unwrap().to_owned(),
-            )));
+            return Ok(Some(Pallet::String(if input.ends_with('\n') {
+                input.strip_suffix('\n').unwrap().to_owned()
+            } else {
+                input
+            })));
         }
     }
 }
