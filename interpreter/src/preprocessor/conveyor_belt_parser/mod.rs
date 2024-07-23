@@ -36,6 +36,18 @@ pub fn parse_conveyor_belts(
         }
     }
 
+    for line in 0..char_map.len() {
+        for col in 0..char_map[line].len() {
+            if BELT_CHARS.contains(char_map[line][col]) && !visited_map[line][col] {
+                return Err(Error::new(
+                    SyntaxError,
+                    SourcePos::new(line, col),
+                    "Unattached belt",
+                ));
+            }
+        }
+    }
+
     return Ok(());
 }
 

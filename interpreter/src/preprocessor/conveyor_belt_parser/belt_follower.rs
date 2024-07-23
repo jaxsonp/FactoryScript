@@ -131,6 +131,6 @@ pub fn follow_belt(
     return Err(Error::new(
         SyntaxError,
         SourceSpan::new(SourcePos::new(pos.line, pos.col), 1),
-        "Conveyor belt out of bounds",
+        "Unattached conveyor belt",
     ));
 }
