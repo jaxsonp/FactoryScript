@@ -20,6 +20,7 @@ lazy_static! {
         &OR,
         &io::PRINT,
         &io::PRINTLN,
+        &io::READLN,
         &math::ADD,
         &math::SUBTRACT,
         &math::MULTIPLY,

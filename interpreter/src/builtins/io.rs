@@ -1,3 +1,5 @@
+use std::io::{stdin, stdout, Write};
+
 use core::*;
 
 pub static PRINT: StationType = StationType {
@@ -45,4 +47,24 @@ fn println_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, St
     print_procedure(pallets)?;
     println!();
     return Ok(None);
+}
+
+pub static READLN: StationType = StationType {
+    id: "readln",
+    alt_id: None,
+    inputs: 1,
+    output: true,
+    procedure: readln_procedure,
+};
+fn readln_procedure(_: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    let mut input = String::new();
+    let _ = stdout().flush();
+    match stdin().read_line(&mut input) {
+        Err(e) => return Err(e.to_string()),
+        Ok(_) => {
+            return Ok(Some(Pallet::String(
+                input.strip_suffix('\n').unwrap().to_owned(),
+            )));
+        }
+    }
 }
