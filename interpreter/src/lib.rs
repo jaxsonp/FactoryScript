@@ -22,19 +22,27 @@ pub fn run(src: &str, print_benchmark: bool) -> Result<(), Error> {
         preprocessor::process(src, &builtins::STATION_TYPES)?;
     let runtime_start_time = Instant::now();
     debug!(2, "Starting");
-    runtime::execute(&mut stations, start_i, &assign_table)?;
+    let step_count = runtime::execute(&mut stations, start_i, &assign_table)?;
 
     if print_benchmark {
         let end_time = Instant::now();
         let preprocess_duration: f64 =
-            ((runtime_start_time - start_time).as_nanos() as f64) / 1000000000.0;
+            ((runtime_start_time - start_time).as_nanos() as f64) / 1000000000f64;
         let runtime_duration: f64 =
-            ((end_time - runtime_start_time).as_nanos() as f64) / 1000000000.0;
-        let total_duration: f64 = ((end_time - start_time).as_nanos() as f64) / 1000000000.0;
-        println!(
-            "\n======Benchmark======\n preprocess {:.5}s\n runtime    {:.5}s\n total      {:.5}s\n=====================",
-            preprocess_duration, runtime_duration, total_duration
-        );
+            ((end_time - runtime_start_time).as_nanos() as f64) / 1000000000f64;
+        let total_duration: f64 = ((end_time - start_time).as_nanos() as f64) / 1000000000f64;
+
+        let avg_step_duration =
+            ((end_time - runtime_start_time).as_nanos() as f64) / ((1000 * step_count) as f64);
+
+        println!("\n======Benchmark======");
+        println!(" steps      {}", step_count);
+        println!(" avg step   {:.2}ms", avg_step_duration);
+        println!();
+        println!(" preprocess {:.5}s", preprocess_duration);
+        println!(" runtime    {:.5}s", runtime_duration);
+        println!(" total      {:.5}s", total_duration);
+        println!("=====================");
     }
 
     Ok(())

@@ -3,12 +3,13 @@ use std::{collections::HashMap, time::Instant};
 
 use crate::*;
 
-/// Spawns pallets from the start station and starts the execution loop
+/// Spawns pallets from the start station and starts the execution loop, returns
+/// the number of steps in the program
 pub fn execute(
     stations: &mut Vec<Station>,
     start_i: usize,
     assign_table: &HashMap<usize, Pallet>,
-) -> Result<(), Error> {
+) -> Result<usize, Error> {
     // recording start time
     let execution_start_t = Instant::now();
 
@@ -18,9 +19,10 @@ pub fn execute(
 
     // begin from start station
     let start_station = &stations[start_i];
-    debug!(3, "Start pallet spawned at #{start_i}");
     moving_pallets.push((Pallet::Empty, start_station.out_bays[0]));
-    let mut t: usize = 0;
+    debug!(3, "Start pallet spawned at #{start_i}");
+
+    let mut step_count: usize = 0;
     'execution_loop: while !moving_pallets.is_empty() {
         // recording start time of iteration
         let step_start_t = Instant::now();
@@ -112,10 +114,10 @@ pub fn execute(
         }
         debug!(
             3,
-            "Step {t} completed ({:.3} ms)",
+            "Step {step_count} completed ({:.3} ms)",
             step_start_t.elapsed().as_secs_f64() * 1000.0
         );
-        t += 1;
+        step_count += 1;
     }
     debug!(2, "No remaining moving pallets");
     debug!(
@@ -123,5 +125,5 @@ pub fn execute(
         "Execution finished in {}s",
         execution_start_t.elapsed().as_secs_f64()
     );
-    return Ok(());
+    return Ok(step_count);
 }
