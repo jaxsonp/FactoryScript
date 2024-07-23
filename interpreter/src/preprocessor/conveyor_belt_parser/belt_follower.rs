@@ -5,7 +5,7 @@ use core::*;
 /// if it is find the origin of the conveyor belt
 ///
 /// Returns an optional tuple of the origin position if it is an input bay
-pub fn evaluate_belt(
+pub fn follow_belt(
     map: &Vec<Vec<char>>,
     visited_map: &mut Vec<Vec<bool>>,
     start: (SourcePos, Direction),

@@ -19,7 +19,7 @@ pub fn parse_conveyor_belts(
         let neighbors = get_neighbors(char_map, &stations[i]);
         for neighbor in neighbors {
             if let Some(origin_pos) =
-                belt_follower::evaluate_belt(char_map, &mut visited_map, neighbor)?
+                belt_follower::follow_belt(char_map, &mut visited_map, neighbor)?
             {
                 if let Some(origin_i) = get_station_at(stations, origin_pos) {
                     let in_bay_index = stations[i].in_bays.len();
