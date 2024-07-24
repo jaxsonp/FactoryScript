@@ -80,7 +80,7 @@ pub fn parse_assign_literal(s: &String, loc: SourceSpan) -> Result<Pallet, Error
 
     if !decimal && !float_terminal {
         // integer literal
-        match i32::from_str_radix(parsed_string.as_str(), 10) {
+        match i64::from_str_radix(parsed_string.as_str(), 10) {
             Ok(num) => return Ok(Pallet::Int(num)),
             Err(e) => {
                 return Err(Error::new(
@@ -92,7 +92,7 @@ pub fn parse_assign_literal(s: &String, loc: SourceSpan) -> Result<Pallet, Error
         };
     } else {
         // float literal
-        match parsed_string.parse::<f32>() {
+        match parsed_string.parse::<f64>() {
             Ok(num) => return Ok(Pallet::Float(num)),
             Err(e) => {
                 return Err(Error::new(

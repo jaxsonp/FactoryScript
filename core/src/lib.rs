@@ -51,8 +51,8 @@ pub enum Pallet {
     Bool(bool),
     Char(char),
     String(String),
-    Int(i32),
-    Float(f32),
+    Int(i64),
+    Float(f64),
 }
 impl std::fmt::Display for Pallet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

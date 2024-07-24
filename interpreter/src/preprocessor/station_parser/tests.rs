@@ -142,7 +142,7 @@ fn test_parse_assign_literal_float() {
         parse_assign_literal(&"123.0".to_owned(), SourceSpan::zero())
             .ok()
             .unwrap(),
-        Pallet::Float(123f32)
+        Pallet::Float(123.0)
     );
     assert_eq!(
         parse_assign_literal(&"0.123456".to_owned(), SourceSpan::zero())
@@ -154,7 +154,7 @@ fn test_parse_assign_literal_float() {
         parse_assign_literal(&"123_456_789f".to_owned(), SourceSpan::zero())
             .ok()
             .unwrap(),
-        Pallet::Float(123456789f32)
+        Pallet::Float(123456789.0)
     );
     assert!(parse_assign_literal(&"123f1".to_owned(), SourceSpan::zero()).is_err());
     assert!(parse_assign_literal(&"1.23.4".to_owned(), SourceSpan::zero()).is_err());
