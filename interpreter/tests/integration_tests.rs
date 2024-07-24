@@ -89,13 +89,10 @@ fn test_for_loop() {
     let file = NamedTempFile::new("tmp").unwrap();
     file.write_str(
         "
-[start]═─{1}
-          ║
- ┌─═{10}─╗│
-[>]─═[]─═[]═─[]═─[println]
- ║ ┌─╝   │
- │ │     ║
-[and]═─[++]",
+[start]      ┌─═[gate]─┐
+     ╚──{1}  │   ╔─┘   ║
+         ╚──[]═─[++]═─[>=]
+ [println]──╝╚──{10}═──┘",
     )
     .unwrap();
     let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
@@ -110,9 +107,12 @@ fn test_greeting() {
     let file = NamedTempFile::new("tmp").unwrap();
     file.write_str(
         "
-[start]═─{\"What is your name? \"}═─[]═─[]═─[readln]═─[]═────────[+]═─[]═─{'!'}═─[+]═─[println]
-                                  ╚─[print]         ╚─{\"Hello \"}═┘   ╚─────────┘
-    ",
+[start]═─{\"What is your name? \"}═─┐
+             ╚─[print]    ╚─┐     │
+                       {\"Hello \"} │
+                          ┌─╝     │
+           [print]─═[]──═[+]─═[readln]
+   [println]─═{'!'}─╝",
     )
     .unwrap();
     let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
