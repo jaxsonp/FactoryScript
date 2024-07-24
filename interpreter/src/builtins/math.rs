@@ -161,7 +161,7 @@ fn add_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String
         }
         _ => {
             return Err(format!(
-                "Unexpected pallets received: {}\n",
+                "Unexpected pallet types received: {}\n",
                 list_pallets(pallets)
             ));
         }
@@ -293,7 +293,7 @@ fn increment_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, 
         }
         _ => {
             return Err(format!(
-                "Expected numerical pallets, received: {}\n",
+                "Expected one numerical pallet, received: {}\n",
                 list_pallets(pallets)
             ));
         }
@@ -317,7 +317,64 @@ fn decrement_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, 
         }
         _ => {
             return Err(format!(
-                "Expected numerical pallets, received: {}\n",
+                "Expected one numerical pallet, received: {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}
+
+pub static AND: StationType = StationType {
+    id: "and",
+    alt_id: None,
+    inputs: 2,
+    output: true,
+    procedure: and_procedure,
+};
+fn and_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match (&pallets[0], &pallets[1]) {
+        (Some(Pallet::Bool(b1)), Some(Pallet::Bool(b2))) => Ok(Some(Pallet::Bool(*b1 && *b2))),
+        _ => {
+            return Err(format!(
+                "Expected at least one boolean pallet, received {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}
+
+pub static OR: StationType = StationType {
+    id: "or",
+    alt_id: None,
+    inputs: 2,
+    output: true,
+    procedure: or_procedure,
+};
+fn or_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match (&pallets[0], &pallets[1]) {
+        (Some(Pallet::Bool(b1)), Some(Pallet::Bool(b2))) => Ok(Some(Pallet::Bool(*b1 || *b2))),
+        _ => {
+            return Err(format!(
+                "Expected at least one boolean pallet, received {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}
+
+pub static NOT: StationType = StationType {
+    id: "not",
+    alt_id: Some("!"),
+    inputs: 1,
+    output: true,
+    procedure: not_procedure,
+};
+fn not_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match &pallets[0] {
+        Some(Pallet::Bool(b1)) => Ok(Some(Pallet::Bool(!(*b1)))),
+        _ => {
+            return Err(format!(
+                "Expected at least one boolean pallet, received {}\n",
                 list_pallets(pallets)
             ));
         }

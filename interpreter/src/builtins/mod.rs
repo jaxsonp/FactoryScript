@@ -1,6 +1,5 @@
 use core::*;
 use lazy_static::lazy_static;
-use std::ops::Not;
 
 pub mod constants;
 mod io;
@@ -15,9 +14,7 @@ lazy_static! {
         &EXIT,
         &JOINT,
         &ASSIGN,
-        &AND,
-        &NOT,
-        &OR,
+        &GATE,
         &io::PRINT,
         &io::PRINTLN,
         &io::READLN,
@@ -26,14 +23,17 @@ lazy_static! {
         &math::MULTIPLY,
         &math::DIVIDE,
         &math::MODULO,
-        &math::INCREMENT,
-        &math::DECREMENT,
         &math::EQUALS,
         &math::NOT_EQUALS,
         &math::GREATER_THAN,
         &math::LESS_THAN,
         &math::GREATER_THAN_EQUAL,
         &math::LESS_THAN_EQUAL,
+        &math::INCREMENT,
+        &math::DECREMENT,
+        &math::AND,
+        &math::NOT,
+        &math::OR,
     ];
 }
 
@@ -47,7 +47,7 @@ fn list_pallets(pallets: &Vec<Option<Pallet>>) -> String {
     let mut output = String::from("(");
     for i in 0..pallets.len() {
         output.push_str(
-            match &pallets[0] {
+            match &pallets[i] {
                 Some(pallet) => format!("{pallet}"),
                 None => String::from("None"),
             }
@@ -96,55 +96,17 @@ pub static ASSIGN: StationType = StationType {
     procedure: none_procedure,
 };
 
-pub static AND: StationType = StationType {
-    id: "and",
+pub static GATE: StationType = StationType {
+    id: "gate",
     alt_id: None,
     inputs: 2,
     output: true,
-    procedure: and_procedure,
+    procedure: gate_procedure,
 };
-fn and_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+fn gate_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
         (Some(Pallet::Bool(b)), Some(pallet)) => Ok(if *b { Some(pallet.clone()) } else { None }),
         (Some(pallet), Some(Pallet::Bool(b))) => Ok(if *b { Some(pallet.clone()) } else { None }),
-        _ => {
-            return Err(format!(
-                "Expected at least one boolean pallet, received {}\n",
-                list_pallets(pallets)
-            ));
-        }
-    }
-}
-
-pub static OR: StationType = StationType {
-    id: "or",
-    alt_id: None,
-    inputs: 2,
-    output: true,
-    procedure: or_procedure,
-};
-fn or_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
-    match (&pallets[0], &pallets[1]) {
-        (Some(Pallet::Bool(b1)), Some(Pallet::Bool(b2))) => Ok(Some(Pallet::Bool(*b1 || *b2))),
-        _ => {
-            return Err(format!(
-                "Expected at least one boolean pallet, received {}\n",
-                list_pallets(pallets)
-            ));
-        }
-    }
-}
-
-pub static NOT: StationType = StationType {
-    id: "not",
-    alt_id: Some("!"),
-    inputs: 1,
-    output: true,
-    procedure: not_procedure,
-};
-fn not_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
-    match &pallets[0] {
-        Some(Pallet::Bool(b1)) => Ok(Some(Pallet::Bool(b1.not()))),
         _ => {
             return Err(format!(
                 "Expected at least one boolean pallet, received {}\n",
