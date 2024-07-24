@@ -1,7 +1,8 @@
 - Crossing conveyor belts
-- convert to larger data types
+- update integration tests, add failures
 - add type alias for destinations
 - make joint station not special
+- min and max consts for number pallets
 - functions
 - documentation
 - modules
