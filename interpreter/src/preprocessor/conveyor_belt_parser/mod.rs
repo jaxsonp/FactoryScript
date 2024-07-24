@@ -14,14 +14,18 @@ pub fn parse_conveyor_belts(
     for line in char_map {
         visited_map.push(line.iter().map(|_| false).collect());
     }
-
+    debug!(2, "Parsing conveyor belts");
     for i in 0..stations.len() {
+        debug!(3, " - #{i} {}", stations[i].logic.id);
+        // get neighbors
         let neighbors = get_neighbors(char_map, &stations[i]);
         for neighbor in neighbors {
+            // check if neighbors originate from a station
             if let Some(origin_pos) =
                 belt_follower::follow_belt(char_map, &mut visited_map, neighbor)?
             {
                 if let Some(origin_i) = get_station_at(stations, origin_pos) {
+                    debug!(3, "   - bay {} from #{origin_i}", stations[i].in_bays.len());
                     let in_bay_index = stations[i].in_bays.len();
                     stations[i].in_bays.push(None);
                     stations[origin_i].out_bays.push((i, in_bay_index));

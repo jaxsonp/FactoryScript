@@ -128,7 +128,7 @@ pub fn parse_stations(
                 'E' => state = State::StationModifiers(mods.with_priority(Direction::EAST)),
                 'S' => state = State::StationModifiers(mods.with_priority(Direction::SOUTH)),
                 'W' => state = State::StationModifiers(mods.with_priority(Direction::WEST)),
-                '~' => state = State::StationModifiers(mods.reverse()),
+                '*' => state = State::StationModifiers(mods.reverse()),
                 ']' => {
                     debug!(4, "   - station end @ {}", pos);
                     let new_station = Station::new(

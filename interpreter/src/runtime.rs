@@ -1,5 +1,5 @@
 use core::Pallet;
-use std::{collections::HashMap, time::Instant};
+use std::collections::HashMap;
 
 use crate::*;
 
@@ -10,9 +10,6 @@ pub fn execute(
     start_i: usize,
     assign_table: &HashMap<usize, Pallet>,
 ) -> Result<usize, Error> {
-    // recording start time
-    let execution_start_t = Instant::now();
-
     // Vector of all pallets to move in the next step, tuple with the pallet and
     // the destination index and bay number
     let mut moving_pallets: Vec<(Pallet, (usize, usize))> = Vec::new();
@@ -49,8 +46,11 @@ pub fn execute(
                 // handling special case stations
                 if station.logic.id == "assign" {
                     // special case: assign station
-                    let new_pallet = if let Some(pallet) = assign_table.get(&i) {
-                        pallet
+                    if let Some(p) = assign_table.get(&i) {
+                        debug!(4, "    - Produced: {}", p);
+                        for out_bay in station.out_bays.iter() {
+                            moving_pallets.push((p.clone(), *out_bay));
+                        }
                     } else {
                         return Err(Error::new(
                             RuntimeError,
@@ -58,18 +58,17 @@ pub fn execute(
                             format!("Can't find assign table entry for #{i}"),
                         ));
                     };
-                    debug!(4, "    - Produced: {}", new_pallet);
-                    moving_pallets.push((new_pallet.clone(), station.out_bays[0]));
                     station.clear_in_bays();
                     continue;
                 } else if station.logic.id == "joint" {
                     // special case: joint station
                     for in_bay in station.in_bays.iter() {
-                        if let Some(pallet) = in_bay {
-                            debug!(4, "    - Produced: {}", pallet);
+                        if let Some(p) = in_bay {
+                            debug!(4, "    - Produced: {}", p);
                             for out_bay in station.out_bays.iter() {
-                                moving_pallets.push((pallet.clone(), *out_bay));
+                                moving_pallets.push((p.clone(), *out_bay));
                             }
+                            break;
                         }
                     }
                     station.clear_in_bays();
@@ -92,10 +91,12 @@ pub fn execute(
                             ));
                         }
                         debug!(4, "    - produced: {}", p);
-                        moving_pallets.push((p, station.out_bays[0]));
+                        for out_bay in station.out_bays.iter() {
+                            moving_pallets.push((p.clone(), *out_bay));
+                        }
                     }
                     Ok(None) => {
-                        if station.logic.output && station.logic.id != "and" {
+                        if station.logic.output && station.logic.id != "gate" {
                             return Err(Error::new(
                                 RuntimeError,
                                 station.loc,
@@ -120,10 +121,6 @@ pub fn execute(
         step_count += 1;
     }
     debug!(2, "No remaining moving pallets");
-    debug!(
-        2,
-        "Execution finished in {}s",
-        execution_start_t.elapsed().as_secs_f64()
-    );
+
     return Ok(step_count);
 }
