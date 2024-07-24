@@ -336,7 +336,7 @@ fn and_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String
         (Some(Pallet::Bool(b1)), Some(Pallet::Bool(b2))) => Ok(Some(Pallet::Bool(*b1 && *b2))),
         _ => {
             return Err(format!(
-                "Expected at least one boolean pallet, received {}\n",
+                "Expected two boolean pallets, received {}\n",
                 list_pallets(pallets)
             ));
         }
@@ -355,7 +355,7 @@ fn or_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String>
         (Some(Pallet::Bool(b1)), Some(Pallet::Bool(b2))) => Ok(Some(Pallet::Bool(*b1 || *b2))),
         _ => {
             return Err(format!(
-                "Expected at least one boolean pallet, received {}\n",
+                "Expected two boolean pallets, received {}\n",
                 list_pallets(pallets)
             ));
         }
@@ -374,7 +374,7 @@ fn not_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String
         Some(Pallet::Bool(b1)) => Ok(Some(Pallet::Bool(!(*b1)))),
         _ => {
             return Err(format!(
-                "Expected at least one boolean pallet, received {}\n",
+                "Expected two boolean pallets, received {}\n",
                 list_pallets(pallets)
             ));
         }

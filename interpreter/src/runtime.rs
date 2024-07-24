@@ -16,8 +16,10 @@ pub fn execute(
 
     // begin from start station
     let start_station = &stations[start_i];
-    moving_pallets.push((Pallet::Empty, start_station.out_bays[0]));
-    debug!(3, "Start pallet spawned at #{start_i}");
+    for out_bay in start_station.out_bays.iter() {
+        moving_pallets.push((Pallet::Empty, *out_bay));
+    }
+    debug!(3, "Start pallets spawned at #{start_i}");
 
     let mut step_count: usize = 0;
     'execution_loop: while !moving_pallets.is_empty() {
@@ -96,7 +98,10 @@ pub fn execute(
                         }
                     }
                     Ok(None) => {
-                        if station.logic.output && station.logic.id != "gate" {
+                        if station.logic.output
+                            && station.logic.id != "gate"
+                            && station.logic.id != "filter"
+                        {
                             return Err(Error::new(
                                 RuntimeError,
                                 station.loc,

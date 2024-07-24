@@ -15,6 +15,7 @@ lazy_static! {
         &JOINT,
         &ASSIGN,
         &GATE,
+        &FILTER,
         &io::PRINT,
         &io::PRINTLN,
         &io::READLN,
@@ -110,6 +111,26 @@ fn gate_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, Strin
         _ => {
             return Err(format!(
                 "Expected at least one boolean pallet, received {}\n",
+                list_pallets(pallets)
+            ));
+        }
+    }
+}
+
+pub static FILTER: StationType = StationType {
+    id: "filter",
+    alt_id: Some("X"),
+    inputs: 1,
+    output: true,
+    procedure: filter_procedure,
+};
+fn filter_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
+    match &pallets[0] {
+        Some(Pallet::Bool(false)) => Ok(None),
+        Some(p) => Ok(Some(p.clone())),
+        _ => {
+            return Err(format!(
+                "Expected pallet, received {}\n",
                 list_pallets(pallets)
             ));
         }
