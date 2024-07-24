@@ -1,5 +1,7 @@
 - Crossing conveyor belts
-- no dangling belts
-- multi output function?
+- convert to larger data types
+- add type alias for destinations
+- make joint station not special
 - functions
+- documentation
 - modules
