@@ -8,7 +8,7 @@ The world's number one M.O.P. (Manufacturing Oriented Programming) language, Fac
 This repository contains:
 
 - `core/`: Cargo package containing core definitions and functions
-- `docs/`: Documentation files
+- `docs/`: Documentation files (Incomplete)
 - `examples/`: Directory containing some FactoryScript code examples
 - `interpreter/`: Cargo package containing the canonical FactoryScript Interpreter
 
@@ -23,7 +23,7 @@ This repository contains:
 
 FactoryScript was motivated by the elegance and efficiency of factories and the modern manufacturing process. FactoryScript code describes the layout of a factory, defining various stations and interconnecting conveyor belts. Instead of variables like you'd find in typical programming languages, FactoryScript stores chunks of data in pallets, which are moved around by conveyor belts and operated on by stations, similar to functions in other languages.
 
-For the complete reference, check out the [full documentation](https://factoryscript.readthedocs.io/en/latest/).
+For the complete reference, check out the [full documentation](https://factoryscript.readthedocs.io/en/latest/) (incomplete).
 
 ### Syntax
 
