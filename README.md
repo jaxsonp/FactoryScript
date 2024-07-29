@@ -21,11 +21,9 @@ This repository contains:
 
 ## Language Overview
 
-FactoryScript was motivated by the elegance and efficiency of factories and the modern manufacturing process. FactoryScript code describes the layout of a factory, defining various stations and interconnecting conveyor belts. Instead of variables like you'd find in typical programming languages, FactoryScript stores chunks of data in pallets, which are moved around by conveyor belts and operated on by stations, similar to functions in other languages.
+FactoryScript was motivated by the elegance and efficiency of factories and the modern manufacturing process. At it's core, FactoryScript has three primary concepts. Pallets, which contain data, which are moved around by conveyor belts to different stations which perform operations on the pallets. FactoryScript code describes the layout and connections of these elements.
 
 For the complete reference, check out the [full documentation](https://factoryscript.readthedocs.io/en/latest/) (incomplete).
-
-### Syntax
 
 **Stations:** In general, stations are defined with square brackets, and contain a single ASCII, non-whitespace identifier, such as `[println]`, `[>=]`, or `[exit]`. There is one exception to this syntax, assign stations. They are defined with curly brackets, and contain literals to be assigned to pallets. Examples include `{"abc"}`, `{true}`, and `{4.025}`
 
@@ -67,139 +65,6 @@ However, because FactoryScript is unopinionated about layout, it is possible to 
 │  ││  └┘ └┐┌─┘ ││ ││ └┐┌──┘   └┐┌──┘ └┐┌──┘ ││    ││ └┐┌─┘  │
 └──┘└──────┘└───┘└─┘└──┘└───────┘└─────┘└────┘└────┘└──┘└────┘
 ```
-
-### Examples
-
-#### Simple loop
-
-```text
-[start]      ┌──═[and]─┐
-     ╚──{1}  │   ╔─┘   ║
-         ╚──[]═─[++]═─[>=]
- [println]──╝╚──{10}═──┘
-```
-
-```sh
-$ factory examples/for_loop.factory
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-$
-```
-
-#### Greeting
-
-```text
-[start]═─{"What is your name? "}═─┐
-             ╚─[print]    ╚─┐     │
-                       {"Hello "} │
-                          ┌─╝     │
-           [print]─═[]──═[+]─═[readln]
-   [println]─═{'!'}─╝
-```
-
-```sh
-$ factory examples/greet.factory
-What is your name? Jeff
-Hello Jeff!
-$
-```
-
-#### Fizzbuzz
-
-```text
-[start]═───{1}═─[]─═[gate]──═[++]───╗
-                ║      └──═[<]────═[gate]────────────┐
-                │           └═{100}─╝│               │
-                │                    │               │
-                │╔──────────────────┐║               │
-       ┌──═{0}─═[]         ┌──═{0}─═[]═─[gate]       │
- [X]─═[=]─═[%]──╝║   [X]─═[=]─═[%]──╝║   │╚─[print]  │
-  ║    ║    └═{3}┘    ║    ║    └═{5}┘   │           │
-  │    └────────┐     │    └────────┐    │           │
- {"fizz"}       │    {"buzz"}       │    │           │
-  ╚─[print]     │     ╚─[print]     │    ║           │
-                └─────────────────[or]═─[!]═─{true}═─┘
-                                        {'\n'}─╝
-                                    [print]─╝
-```
-
-```sh
-$ factory examples/fizzbuzz.factory
-1
-2
-fizz
-4
-buzz
-fizz
-7
-8
-fizz
-buzz
-
-...
-
-fizzbuzz
-91
-92
-fizz
-94
-buzz
-fizz
-97
-98
-fizz
-buzz
-$
-```
-
-#### First 40 fibonacci numbers
-
-```
-                       ┌═[++]───╗
-  [start]═─{1}═───────[]═─────[gate]
-    ║  ║              ║╚───[!=]═┘
-    │  │   ┌[println] └{40}═┘║
-  ╔{0}{1}  ║                 │
-  │ ║  ╚──[]═───[gate]───────┘
-  │ │      └───╗  ║║
-  │ └─────[]═─[+]─┘│
-[println]  └───────┘
-```
-
-```sh
-$ factory examples/fibonacci.factory
-0
-1
-1
-2
-3
-5
-8
-13
-21
-34
-55
-89
-
-...
-
-14930352
-24157817
-39088169
-63245986
-102334155
-$
-```
-
-More examples can be found in the `examples/` directory.
 
 ## Build Instructions
 
