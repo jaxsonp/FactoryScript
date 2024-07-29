@@ -1,0 +1,19 @@
+site_name: FactoryScript Documentation
+site_description: The official FactoryScript documentation
+site_author: Jaxson Pahukula
+copyright: © Jaxson Pahukula
+repo_url: https://github.com/jaxsonp/FactoryScript
+
+nav:
+  - Language Overview: index.md
+  - Station Reference: station-ref.md
+
+docs_dir: src/
+markdown_extensions:
+  - admonition
+
+extra_css:
+  - extra.css
+theme:
+  name: cinder
+  disable_nav_previous_next: true

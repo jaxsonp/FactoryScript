@@ -1,8 +1,6 @@
+- Finish documentation
 - Crossing conveyor belts
 - update integration tests, add failures
-- add type alias for destinations
-- make joint station not special
+- make joint station not a special case
 - min and max consts for number pallets
 - functions
-- documentation
-- modules

@@ -3,14 +3,14 @@
 [![Cargo tests](https://github.com/jaxsonp/FactoryScript/actions/workflows/rust.yml/badge.svg)](https://github.com/jaxsonp/FactoryScript/actions/workflows/rust.yml)
 [![Documentation Status](https://readthedocs.org/projects/factoryscript/badge/?version=latest)](https://factoryscript.readthedocs.io/en/latest/?badge=latest)
 
-The world's number one M.O.P. (Manufacturing Oriented Programming) language, FactoryScript is a dynamically typed, interpreted programming language inspired by the beauty of the industrial revolution.
+The world's number one M.O.P. (Manufacturing Oriented Programming) language, FactoryScript is a dynamically typed, interpreted programming language inspired by the magnificence of the industrial revolution.
 
 This repository contains:
 
 - `core/`: Cargo package containing core definitions and functions
-- `docs/`: Documentation source
+- `docs/`: Documentation files
 - `examples/`: Directory containing some FactoryScript code examples
-- `interpreter/`: Cargo package containing the FactoryScript Interpreter
+- `interpreter/`: Cargo package containing the canonical FactoryScript Interpreter
 
 ### Table of Contents
 
