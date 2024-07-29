@@ -16,7 +16,7 @@ build:
     # golang: "1.19"
 
 mkdocs:
-  configuration: mkdocs.yml
+  configuration: docs/mkdocs.yml
 
 # Optional but recommended, declare the Python requirements required
 # to build your documentation
