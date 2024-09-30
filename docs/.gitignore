@@ -1,1 +1,3 @@
-site/
+build/
+_build/
+venv/
