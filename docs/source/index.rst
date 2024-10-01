@@ -1,13 +1,16 @@
 
-FactoryScript Documentation 
-===========================
-
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-   Station Reference
+   :maxdepth: 3
+   :hidden:
 
-Welcome to the offical FactoryScript documentation! FactoryScript is the world's number one M.O.P. (Manufacturing Oriented Programming) language. It is a dynamically typed, interpreted programming language inspired by the beauty of the industrial revolution.
+   Language Documentation <self>
+   Station Reference <station-ref>
+
+====================================
+FactoryScript Language Documentation 
+====================================
+
+Welcome to the offical FactoryScript documentation! FactoryScript is the world's number one M.O.P. (Manufacturing Oriented Programming) language. It is a dynamically typed, interpreted programming language inspired by the grandeur of the industrial revolution.
 
 Below is an overview of the FactoryScript programming language, to find information about all the built-in station types and their operations, go to the :doc:`station reference<station-ref>`.
 
@@ -68,14 +71,14 @@ Stations are defined with square brackets*, with an ASCII, non-whitespace identi
 
 \* *Assign stations do not use square brackets, see* :ref:`Special Stations`
 
-Station Behavior
-^^^^^^^^^^^^^^^^
+Behavior
+^^^^^^^^
 
 A station can have any number of conveyor belt inputs, also known as bays. Every station type has a defined number of bays that need to be occupied before that station's operation is triggered. When an operation is triggered, the station consumes *all* of the pallets in it's bays. Depending on its type, the station might then produce an output pallet on its output conveyor belt, starting with a double belt symbol (``═``, ``║``, ``╝``, etc). 
 
 Let us use the addition station ``[+]`` as an example. By its definition, this station requires 2 inputs (the two operands), and it does produce an output pallet (the sum). That means that once this station has two occupied bays, it will consume the pallets in its bays, then produce a new pallet containing the sum.
 
-.. warning::
+.. danger::
    If a pallet enters an already occupied bay, the original pallet **will be dropped**, being overwritten by the new pallet.
 
 
