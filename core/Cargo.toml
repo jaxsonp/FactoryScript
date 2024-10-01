@@ -9,3 +9,7 @@ repository.workspace = true
 
 [dependencies]
 lazy_static = "1.5.0"
+
+[[bin]]
+name = "generate-docs"
+path = "src/bin/generate_docs.rs"

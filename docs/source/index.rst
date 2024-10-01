@@ -74,7 +74,7 @@ Stations are defined with square brackets*, with an ASCII, non-whitespace identi
 Behavior
 ^^^^^^^^
 
-A station can have any number of conveyor belt inputs, also known as bays. Every station type has a defined number of bays that need to be occupied before that station's operation is triggered. When an operation is triggered, the station consumes *all* of the pallets in it's bays. Depending on its type, the station might then produce an output pallet on its output conveyor belt, starting with a double belt symbol (``═``, ``║``, ``╝``, etc). 
+A station can have any number of conveyor belt inputs, also known as bays. Every station type has a defined number of bays that need to be occupied before that station's operation is triggered. When an operation is triggered, the station consumes *all* of the pallets in it's bays. Depending on its type, the station might then produce an output pallet that is sent out to all its output conveyor belts, which start with a double belt symbol (``═``, ``║``, ``╝``, etc). 
 
 Let us use the addition station ``[+]`` as an example. By its definition, this station requires 2 inputs (the two operands), and it does produce an output pallet (the sum). That means that once this station has two occupied bays, it will consume the pallets in its bays, then produce a new pallet containing the sum.
 
