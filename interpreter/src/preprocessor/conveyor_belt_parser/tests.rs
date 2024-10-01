@@ -13,7 +13,7 @@ fn test_get_neighbors() {
         "",
         SourceSpan::new(SourcePos::new(1, 1), 2),
         StationModifiers::default(),
-        &builtins::STATION_TYPES,
+        &STATION_TYPES,
     )
     .unwrap();
     assert_eq!(
@@ -36,7 +36,7 @@ fn test_get_neighbors_on_border() {
         "",
         SourceSpan::new(SourcePos::new(0, 1), 2),
         StationModifiers::default(),
-        &builtins::STATION_TYPES,
+        &STATION_TYPES,
     )
     .unwrap();
     assert_eq!(
@@ -51,7 +51,7 @@ fn test_get_neighbors_on_border() {
         "",
         SourceSpan::new(SourcePos::new(1, 0), 2),
         StationModifiers::default(),
-        &builtins::STATION_TYPES,
+        &STATION_TYPES,
     )
     .unwrap();
     assert_eq!(
@@ -68,7 +68,7 @@ fn test_get_neighbors_on_border() {
         "",
         SourceSpan::new(SourcePos::zero(), 2),
         StationModifiers::default(),
-        &builtins::STATION_TYPES,
+        &STATION_TYPES,
     )
     .unwrap();
     assert_eq!(get_neighbors(&map, &station), vec![])
@@ -85,7 +85,7 @@ fn test_get_neighbors_with_modifiers() {
         "",
         SourceSpan::new(SourcePos::new(1, 1), 2),
         StationModifiers::default().with_priority(Direction::EAST),
-        &builtins::STATION_TYPES,
+        &STATION_TYPES,
     )
     .unwrap();
     assert_eq!(

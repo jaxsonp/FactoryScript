@@ -46,7 +46,7 @@ pub fn parse_conveyor_belts(
                 return Err(Error::new(
                     SyntaxError,
                     SourcePos::new(line, col),
-                    "Unattached belt",
+                    "Unattached conveyor belt",
                 ));
             }
         }

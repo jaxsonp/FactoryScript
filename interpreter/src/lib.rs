@@ -3,13 +3,12 @@ pub static mut DEBUG_LEVEL: u8 = 0;
 
 use std::{cmp::min, time::Instant};
 
-pub mod builtins;
 pub mod error;
 pub mod macros;
 pub mod preprocessor;
 pub mod runtime;
 
-use core::*;
+use core::{station_types::STATION_TYPES, *};
 use error::{Error, ErrorType::*};
 
 pub type Namespace = Vec<&'static StationType<'static>>;
@@ -18,8 +17,7 @@ pub fn run(src: &str, print_benchmark: bool) -> Result<(), Error> {
     let start_time = Instant::now();
 
     debug!(2, "Preprocessing...");
-    let (mut stations, start_i, assign_table) =
-        preprocessor::process(src, &builtins::STATION_TYPES)?;
+    let (mut stations, start_i, assign_table) = preprocessor::process(src, &STATION_TYPES)?;
     let runtime_start_time = Instant::now();
     debug!(2, "Starting");
     let step_count = runtime::execute(&mut stations, start_i, &assign_table)?;
@@ -244,7 +242,7 @@ mod tests {
             "joint",
             SourcePos::zero().spanning(0),
             StationModifiers::default(),
-            &builtins::STATION_TYPES,
+            &STATION_TYPES,
         )
         .unwrap();
         station.in_bays.push(Some(Pallet::Empty));

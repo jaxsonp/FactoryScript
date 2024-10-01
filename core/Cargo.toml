@@ -8,3 +8,4 @@ readme.workspace = true
 repository.workspace = true
 
 [dependencies]
+lazy_static = "1.5.0"

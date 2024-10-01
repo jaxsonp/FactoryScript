@@ -1,6 +1,6 @@
 use std::io::{stdin, stdout, Write};
 
-use core::*;
+use crate::*;
 
 pub static PRINT: StationType = StationType {
     id: "print",

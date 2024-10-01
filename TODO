@@ -1,6 +1,6 @@
 - Finish documentation
 - Crossing conveyor belts
-- change builtins to just be one giant switch
+- add function to get n pallets for builtins
 - add scientific notation in float literals
 - should preprocessor check for semantics (correct outputs)
 - add check for invalid modifiers

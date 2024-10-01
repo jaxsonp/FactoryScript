@@ -1,5 +1,5 @@
 use super::list_pallets;
-use core::*;
+use crate::*;
 
 pub static EQUALS: StationType = StationType {
     id: "eq",
