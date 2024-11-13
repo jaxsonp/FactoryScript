@@ -1,4 +1,3 @@
-
 pub mod constants;
 pub mod stations;
 
@@ -24,8 +23,6 @@ pub struct StationType {
     /// Station's procedure, takes a vector of input pallets and returns an optional
     /// pallet if successful, and an error message in a String if not
     pub procedure: fn(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String>,
-
-    pub description: &'static str,
 }
 impl StationType {
     /// Function to check whether a station has a certain ID
