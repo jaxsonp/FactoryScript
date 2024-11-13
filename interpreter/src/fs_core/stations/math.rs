@@ -153,11 +153,6 @@ fn add_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String
         (Some(Pallet::Float(num1)), Some(Pallet::Float(num2))) => {
             return Ok(Some(Pallet::Float(num1 + num2)));
         }
-        (Some(Pallet::Char(char1)), Some(Pallet::Char(char2))) => {
-            let mut s = char1.to_string();
-            s.push(*char2);
-            return Ok(Some(Pallet::String(s)));
-        }
         (Some(Pallet::String(string)), Some(Pallet::Char(char))) => {
             let mut s = string.to_owned();
             s.push(*char);
