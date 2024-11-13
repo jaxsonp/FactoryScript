@@ -7,6 +7,7 @@ pub static EQUALS: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: equals_procedure,
+    description: "",
 };
 fn equals_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     return Ok(Some(Pallet::Bool(pallets[0] == pallets[1])));
@@ -18,6 +19,7 @@ pub static NOT_EQUALS: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: not_equals_procedure,
+    description: "",
 };
 fn not_equals_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     return Ok(Some(Pallet::Bool(pallets[0] != pallets[1])));
@@ -29,6 +31,7 @@ pub static GREATER_THAN: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: greater_than_procedure,
+    description: "",
 };
 fn greater_than_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -56,6 +59,7 @@ pub static LESS_THAN: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: less_than_procedure,
+    description: "",
 };
 fn less_than_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -83,6 +87,7 @@ pub static GREATER_THAN_EQUAL: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: greater_than_equal_procedure,
+    description: "",
 };
 fn greater_than_equal_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -110,6 +115,7 @@ pub static LESS_THAN_EQUAL: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: less_than_equal_procedure,
+    description: "",
 };
 fn less_than_equal_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -137,6 +143,7 @@ pub static ADD: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: add_procedure,
+    description: "",
 };
 fn add_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -174,6 +181,7 @@ pub static SUBTRACT: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: subtract_procedure,
+    description: "",
 };
 fn subtract_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -198,6 +206,7 @@ pub static MULTIPLY: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: multiply_procedure,
+    description: "",
 };
 fn multiply_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -222,6 +231,7 @@ pub static DIVIDE: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: divide_procedure,
+    description: "",
 };
 fn divide_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -252,6 +262,7 @@ pub static MODULO: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: modulo_procedure,
+    description: "",
 };
 fn modulo_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -282,6 +293,7 @@ pub static INCREMENT: StationType = StationType {
     inputs: 1,
     output: true,
     procedure: increment_procedure,
+    description: "",
 };
 fn increment_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match &pallets[0] {
@@ -306,6 +318,7 @@ pub static DECREMENT: StationType = StationType {
     inputs: 1,
     output: true,
     procedure: decrement_procedure,
+    description: "",
 };
 fn decrement_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match &pallets[0] {
@@ -330,6 +343,7 @@ pub static AND: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: and_procedure,
+    description: "",
 };
 fn and_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -349,6 +363,7 @@ pub static OR: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: or_procedure,
+    description: "",
 };
 fn or_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -368,6 +383,7 @@ pub static NOT: StationType = StationType {
     inputs: 1,
     output: true,
     procedure: not_procedure,
+    description: "",
 };
 fn not_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match &pallets[0] {

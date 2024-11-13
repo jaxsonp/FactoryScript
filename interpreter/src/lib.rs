@@ -4,14 +4,15 @@ pub static mut DEBUG_LEVEL: u8 = 0;
 use std::{cmp::min, time::Instant};
 
 pub mod error;
+pub mod fs_core;
 pub mod macros;
 pub mod preprocessor;
 pub mod runtime;
 
-use core::{station_types::STATION_TYPES, *};
 use error::{Error, ErrorType::*};
+use fs_core::{stations::STATION_TYPES, *};
 
-pub type Namespace = Vec<&'static StationType<'static>>;
+pub type Namespace = Vec<&'static StationType>;
 
 pub fn run(src: &str, print_benchmark: bool) -> Result<(), Error> {
     let start_time = Instant::now();
@@ -52,7 +53,7 @@ pub struct Station {
     /// Location of the station in source code
     pub loc: SourceSpan,
     /// Station functionality and type information
-    pub logic: &'static StationType<'static>,
+    pub logic: &'static StationType,
     /// Modifiers duh
     pub modifiers: StationModifiers,
     /// Queues for each input bay

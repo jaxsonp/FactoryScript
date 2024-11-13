@@ -8,6 +8,7 @@ pub static PRINT: StationType = StationType {
     inputs: 1,
     output: false,
     procedure: print_procedure,
+    description: "",
 };
 fn print_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match &pallets[0] {
@@ -42,6 +43,7 @@ pub static PRINTLN: StationType = StationType {
     inputs: 1,
     output: false,
     procedure: println_procedure,
+    description: "",
 };
 fn println_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     print_procedure(pallets)?;
@@ -55,6 +57,7 @@ pub static READLN: StationType = StationType {
     inputs: 1,
     output: true,
     procedure: readln_procedure,
+    description: "",
 };
 fn readln_procedure(_: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     let mut input = String::new();

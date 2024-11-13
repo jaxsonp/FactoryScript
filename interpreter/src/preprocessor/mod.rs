@@ -4,7 +4,7 @@ pub mod conveyor_belt_parser;
 pub mod station_parser;
 
 use crate::*;
-use core::Pallet;
+use fs_core::Pallet;
 
 #[cfg(test)]
 mod tests;

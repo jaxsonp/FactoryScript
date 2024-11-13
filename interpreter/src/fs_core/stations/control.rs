@@ -6,6 +6,7 @@ pub static START: StationType = StationType {
     inputs: 0,
     output: true,
     procedure: start_procedure,
+    description: "",
 };
 fn start_procedure(_: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     return Ok(Some(Pallet::Empty));
@@ -17,6 +18,7 @@ pub static EXIT: StationType = StationType {
     inputs: 1,
     output: false,
     procedure: none_procedure,
+    description: "",
 };
 
 pub static JOINT: StationType = StationType {
@@ -25,6 +27,7 @@ pub static JOINT: StationType = StationType {
     inputs: 1,
     output: true,
     procedure: none_procedure,
+    description: "",
 };
 
 pub static ASSIGN: StationType = StationType {
@@ -33,6 +36,7 @@ pub static ASSIGN: StationType = StationType {
     inputs: 1,
     output: true,
     procedure: none_procedure,
+    description: "",
 };
 
 pub static GATE: StationType = StationType {
@@ -41,6 +45,7 @@ pub static GATE: StationType = StationType {
     inputs: 2,
     output: true,
     procedure: gate_procedure,
+    description: "",
 };
 fn gate_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match (&pallets[0], &pallets[1]) {
@@ -61,6 +66,7 @@ pub static FILTER: StationType = StationType {
     inputs: 1,
     output: true,
     procedure: filter_procedure,
+    description: "",
 };
 fn filter_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String> {
     match &pallets[0] {

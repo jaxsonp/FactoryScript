@@ -1,5 +1,5 @@
 use super::*;
-use core::station_types::STATION_TYPES;
+use fs_core::stations::STATION_TYPES;
 
 /// Helper function to easily make 2D vector character maps from string, used to
 /// simplify test case code

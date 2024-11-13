@@ -1,8 +1,6 @@
-#[cfg(test)]
-mod tests;
 
 pub mod constants;
-pub mod station_types;
+pub mod stations;
 
 pub const BELT_CHARS: &str = "─│┌┐└┘═║╔╗╚╝";
 pub const SINGLE_BELT_CHARS: &str = "─│┌┐└┘";
@@ -14,11 +12,11 @@ pub const WEST_BELT_CHARS: &str = "─┐┘═╗╝";
 
 /// Defines a station and all the required information and functionality
 #[derive(Debug)]
-pub struct StationType<'a> {
+pub struct StationType {
     /// Identifier
-    pub id: &'a str,
+    pub id: &'static str,
     /// Alternate identifier
-    pub alt_id: Option<&'a str>,
+    pub alt_id: Option<&'static str>,
     /// Minimum number of inputs required for this station to trigger its procedure
     pub inputs: usize,
     /// Does this station produce an output pallet
@@ -26,8 +24,10 @@ pub struct StationType<'a> {
     /// Station's procedure, takes a vector of input pallets and returns an optional
     /// pallet if successful, and an error message in a String if not
     pub procedure: fn(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, String>,
+
+    pub description: &'static str,
 }
-impl StationType<'_> {
+impl StationType {
     /// Function to check whether a station has a certain ID
     pub fn has_id(&self, query: &str) -> bool {
         return self.id == query || (self.alt_id.is_some_and(|alt_id| alt_id == query));

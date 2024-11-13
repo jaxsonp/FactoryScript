@@ -1,7 +1,6 @@
 [workspace]
 members = [
 	"interpreter", 
-	"core"
 ]
 resolver = "2"
 

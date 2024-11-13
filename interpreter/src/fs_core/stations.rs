@@ -6,7 +6,7 @@ mod io;
 mod math;
 
 lazy_static! {
-    pub static ref STATION_TYPES: Vec<&'static StationType<'static>> = vec![
+    pub static ref STATION_TYPES: Vec<&'static StationType> = vec![
         &control::START,
         &control::EXIT,
         &control::JOINT,

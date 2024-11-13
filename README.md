@@ -7,7 +7,6 @@ The world's number one M.O.P. (Manufacturing Oriented Programming) language, Fac
 
 This repository contains:
 
-- `core/`: Cargo package containing core definitions and functions
 - `docs/`: Documentation files (Incomplete)
 - `examples/`: Directory containing some FactoryScript code examples
 - `interpreter/`: Cargo package containing the canonical FactoryScript Interpreter

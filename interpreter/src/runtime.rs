@@ -1,4 +1,4 @@
-use core::Pallet;
+use fs_core::Pallet;
 use std::collections::HashMap;
 
 use crate::*;
