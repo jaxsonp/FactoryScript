@@ -288,7 +288,7 @@ fn modulo_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, Str
 }
 
 pub static INCREMENT: StationType = StationType {
-    id: "increment",
+    id: "inc",
     alt_id: Some("++"),
     inputs: 1,
     output: true,
@@ -313,7 +313,7 @@ fn increment_procedure(pallets: &Vec<Option<Pallet>>) -> Result<Option<Pallet>, 
 }
 
 pub static DECREMENT: StationType = StationType {
-    id: "decrement",
+    id: "dec",
     alt_id: Some("--"),
     inputs: 1,
     output: true,
